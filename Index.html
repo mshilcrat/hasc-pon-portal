@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HASC Center PON Training Portal</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;min-height:100vh}h
+.header{background:#fff;border-bottom:3px solid #00b4a0;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.hasc-logo-img{height:44px;width:auto;display:block;object-fit:contain}
+.header-left{display:flex;align-items:center;gap:12px}.header-right{display:flex;align-items:center;gap:10px}
+.admin-nav{background:#0d9488;padding:8px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.admin-nav span{color:#ccfbf1;font-size:.82rem;font-weight:600;margin-right:4px}
+.admin-nav-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 14px;border-radius:6px;font-size:.82rem;cursor:pointer}
+.admin-nav-btn:hover{background:rgba(255,255,255,.28)}.admin-nav-btn.active{background:#fff;color:#0d9488;font-weight:700}
+.container{max-width:960px;margin:32px auto;padding:0 16px}
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:32px;margin-bottom:24px}
+.card h2{font-size:1.2rem;font-weight:700;margin-bottom:20px;color:#1a202c;display:flex;align-items:center;gap:8px}
+.portal-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:640px){.portal-grid{grid-template-columns:1fr}}
+.portal-card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:28px;cursor:pointer;border:2px solid transparent;transition:all .2s;text-align:center}
+.portal-card:hover{border-color:#00b4a0;transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,174,239,.15)}
+.portal-card .icon{width:64px;height:64px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px}
+.portal-card.nurse .icon{background:#e0f7fa}.portal-card.admin .icon{background:#fff8e1}
+.portal-card h3{font-size:1.1rem;font-weight:700;margin-bottom:6px}.portal-card p{font-size:.88rem;color:#6b7280;line-height:1.5}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;font-weight:600;font-size:.92rem;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:#00b4a0;color:#fff}.btn-primary:hover{background:#009688}
+.btn-success{background:#059669;color:#fff}.btn-success:hover{background:#047857}
+.btn-secondary{background:#f3f4f6;color:#374151;border:1px solid #d1d5db}.btn-secondary:hover{background:#e5e7eb}
+.btn-warning{background:#d97706;color:#fff}.btn-warning:hover{background:#b45309}
+.btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-sm{padding:5px 12px;font-size:.8rem}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-weight:600;font-size:.88rem;margin-bottom:6px;color:#374151}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:.95rem;outline:none;transition:border .2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#00b4a0}
+.form-group textarea{min-height:80px;resize:vertical}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.two-col{grid-template-columns:1fr}}
+.pin-group{display:flex;gap:10px;justify-content:center;margin:12px 0}
+.pin-digit,.adm-pin,.new-pin,.admin-new-pin{width:52px;height:52px;text-align:center;font-size:1.3rem;font-weight:700;border:2px solid #d1d5db;border-radius:10px;outline:none}
+.pin-digit:focus,.adm-pin:focus,.new-pin:focus,.admin-new-pin:focus{border-color:#00b4a0}
+.tabs{display:flex;gap:4px;border-bottom:2px solid #e5e7eb;margin-bottom:24px}
+.tab-btn{padding:10px 20px;border:none;background:none;font-size:.92rem;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0}
+.tab-btn.active{color:#00b4a0;border-bottom-color:#00b4a0;background:#f0f9ff}
+.alert{padding:12px 16px;border-radius:8px;font-size:.9rem;margin-bottom:16px}
+.alert-error{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626}
+.alert-success{background:#f0fdf4;border:1px solid #86efac;color:#15803d}
+.alert-info{background:#eff6ff;border:1px solid #93c5fd;color:#1d4ed8}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+@media(max-width:640px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);padding:20px;text-align:center}
+.stat-card .num{font-size:2rem;font-weight:800;color:#00b4a0}.stat-card .lbl{font-size:.82rem;color:#6b7280;margin-top:4px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{background:#f8fafc;padding:10px 12px;text-align:left;font-weight:700;color:#374151;border-bottom:2px solid #e5e7eb}
+td{padding:10px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:hover td{background:#f8fafc}
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:.8rem;font-weight:700}
+.badge-pass{background:#d1fae5;color:#065f46}.badge-fail{background:#fee2e2;color:#991b1b}
+.badge-active{background:#dbeafe;color:#1e40af}.badge-inactive{background:#f3f4f6;color:#6b7280}
+.filter-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px;align-items:end}
+.filter-bar input,.filter-bar select{padding:8px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:.87rem;width:100%}
+.pending-item{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}
+.pending-item .info .dsp-name{font-weight:700;margin-bottom:4px}
+.pending-item .info .phone,.pending-item .info .question,.pending-item .info .meta{font-size:.87rem;margin-bottom:4px;color:#6b7280}
+.steps{display:flex;align-items:center;justify-content:center;margin-bottom:32px}
+.step{display:flex;align-items:center;gap:8px}
+.step-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;background:#e5e7eb;color:#6b7280}
+.step-label{font-size:.82rem;color:#6b7280;font-weight:600}
+.step.active .step-num{background:#00b4a0;color:#fff}.step.active .step-label{color:#00b4a0}
+.step.done .step-num{background:#059669;color:#fff}.step.done .step-label{color:#059669}
+.step-line{width:40px;height:2px;background:#e5e7eb;margin:0 4px}
+.quiz-option{display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px solid #e5e7eb;border-radius:8px;cursor:pointer;margin-bottom:8px;transition:all .2s}
+.quiz-option:hover{border-color:#00b4a0;background:#f0f9ff}.quiz-option.selected{border-color:#00b4a0;background:#eff6ff}
+.quiz-option.correct{border-color:#059669;background:#f0fdf4}.quiz-option.wrong{border-color:#dc2626;background:#fef2f2}
+.opt-letter{font-weight:700;color:#6b7280;min-width:20px}
+.question-builder{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:18px;margin-bottom:16px}
+.question-builder h4{font-size:.95rem;font-weight:700;margin-bottom:12px;color:#374151}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.options-grid{grid-template-columns:1fr}}
+.option-row{display:flex;align-items:center;gap:8px}
+.option-row input[type=text]{flex:1;padding:8px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:.87rem}
+.option-row input[type=radio]{accent-color:#00b4a0;width:16px;height:16px;cursor:pointer}
+.correct-label{font-size:.78rem;color:#059669;font-weight:600;white-space:nowrap}
+.cert-box{background:linear-gradient(135deg,#f0f9ff,#e0f7fa);border:3px solid #00b4a0;border-radius:16px;padding:36px;text-align:center;max-width:520px;margin:0 auto}
+.cert-title{font-size:1.6rem;font-weight:800;color:#00b4a0;margin-bottom:4px}
+.cert-org{font-size:.9rem;color:#6b7280;margin-bottom:16px}
+.cert-name{font-size:1.5rem;font-weight:800;color:#1a202c;border-bottom:2px solid #00b4a0;padding-bottom:8px;margin-bottom:12px}
+.cert-detail{font-size:.92rem;color:#374151;margin-bottom:4px}.cert-score{font-size:1.1rem;font-weight:700;color:#00b4a0;margin-top:10px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal-content{background:#fff;border-radius:16px;padding:32px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;position:relative}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#6b7280}
+.login-box{max-width:400px;margin:60px auto;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.1);padding:40px;text-align:center}
+.login-box .icon{font-size:3rem;margin-bottom:16px}.login-box h2{font-size:1.3rem;font-weight:700;margin-bottom:6px}
+.login-box p{color:#6b7280;font-size:.9rem;margin-bottom:24px}
+.login-box .err{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px;border-radius:8px;font-size:.88rem;margin-bottom:12px;display:none}
+.user-card{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.user-card .uinfo{flex:1}.user-card .uname{font-weight:700;margin-bottom:2px}.user-card .uemail{font-size:.85rem;color:#6b7280}
+.user-card .uactions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.form-section{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:20px;margin-bottom:20px}
+.form-section h3{font-size:1rem;font-weight:700;margin-bottom:16px;color:#0369a1}
+.dsp-header{background:linear-gradient(135deg,#00b4a0,#0076c0);color:#fff;padding:20px 24px;border-radius:14px;margin-bottom:24px}
+.dsp-header h2{font-size:1.2rem;font-weight:700}.dsp-header p{font-size:.88rem;opacity:.85;margin-top:4px}
+.link-box{background:#f0f9ff;border:1px solid #00b4a0;border-radius:10px;padding:16px;display:flex;align-items:center;gap:10px;margin-top:12px}
+.link-box input{flex:1;border:none;background:none;font-size:.88rem;color:#1a202c;outline:none;font-family:monospace}
+.spinner{display:none;width:18px;height:18px;border:3px solid #e5e7eb;border-top-color:#00b4a0;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.section-title{font-size:1.1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.text-muted{color:#6b7280;font-size:.85rem}.mt-8{margin-top:8px}.mt-16{margin-top:16px}.mb-16{margin-bottom:16px}
+.video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;background:#000}
+.video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+
+/* Print styles for certificates */
+@media print {
+  @page { 
+    size: portrait;
+    margin: 0.5in; 
+  }
+  
+  body * { 
+    visibility: hidden; 
+  }
+  
+  #print-area,
+  #print-area * { 
+    visibility: visible; 
+  }
+  
+  #print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
+  .cert-box { 
+    page-break-after: always;
+    page-break-inside: avoid;
+    width: 7.5in;
+    max-width: 7.5in;
+    margin: 0 auto 0.5in;
+    padding: 40px;
+    border: 3px solid #00b4a0;
+    box-shadow: none;
+    background: white !important;
+  }
+  
+  .cert-box:last-child {
+    page-break-after: auto;
+  }
+  
+  .modal-close, 
+  .btn, 
+  button,
+  .header,
+  .admin-nav,
+  .nav-tabs,
+  .form-group,
+  input,
+  select,
+  textarea { 
+    display: none !important; 
+  }
+  
+  .modal {
+    position: static !important;
+    background: white !important;
+  }
+  
+  .modal-content {
+    box-shadow: none !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+}
+
+
+/* Modern Clean Styles */
+.pon-card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:20px;overflow:hidden}
+.pon-card-hdr{background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.pon-card-hdr h2{font-size:1rem;font-weight:700;margin:0;text-transform:uppercase;letter-spacing:.5px}
+.pon-label{display:block;font-size:.85rem;font-weight:600;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
+.pon-input{width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.95rem;transition:border-color .2s}
+.pon-input:focus{outline:none;border-color:#00b4a0}
+.badge-count{background:#e6faf8;color:#00b4a0;border:1px solid #00b4a0;padding:2px 12px;border-radius:20px;font-size:.75rem;font-weight:700;margin-left:8px}
+.pin-display{background:#f0fdfa;color:#00b4a0;font-weight:700;font-family:monospace;padding:4px 12px;border-radius:6px;font-size:.9rem;border:1px solid #99f6e4}
+.action-btn-group{display:flex;gap:6px}
+.btn-deactivate{background:#fff;border:1.5px solid #e2e8f0;color:#64748b;padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer}
+.btn-deactivate:hover{background:#f8fafc;border-color:#cbd5e1}
+.btn-remove{background:#ef4444;border:none;color:#fff;padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer}
+.btn-remove:hover{background:#dc2626}
+.info-banner{background:#e6faf8;border-left:4px solid #00b4a0;border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:.88rem;line-height:1.6;color:#0f766e}
+
+</style>
+</head>
+<body>
+<div id="homepage" style="display:none">
+  <div class="header"><div class="header-left" style="margin-left:72px;margin-top:36px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" height="44" style="display:block"><rect x="0" y="2" width="22" height="22" fill="#00b4a0"/><polygon points="26,24 48,24 37,2" fill="#F5C518"/><circle cx="11" cy="39" r="11" fill="#F5C518"/><path d="M 37,28 A 11,11 0 0,0 37,50 Z" fill="#00b4a0"/><rect x="37" y="28" width="11" height="22" fill="#00b4a0"/><text x="56" y="26" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">HASC</text><text x="56" y="50" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">CENTER</text></svg></div></div>
+  <div class="container" style="max-width:700px;margin-top:60px">
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="font-size:2rem;font-weight:800;color:#1a202c;margin-bottom:8px">PON Training Portal</div>
+      <p style="color:#6b7280">Select your portal below. Nurses manage training sessions; Admin views all data.</p>
+    </div>
+    <div class="portal-grid">
+      <div class="portal-card nurse" onclick="showPortal('nurse')"><div class="icon">👩‍⚕️</div><h3>PON Training Portal</h3><p>Set up training sessions, generate DSP links, view completion certificates.</p></div>
+      <div class="portal-card admin" onclick="showPortal('admin')"><div class="icon">🔑</div><h3>Staff Access Manager</h3><p>Admin only — view all training data, manage staff and admin accounts.</p></div>
+    </div>
+  </div>
+</div>
+<div id="nurse-portal" style="display:none">
+  <div class="header">
+    <div class="header-left" style="margin-left:72px;margin-top:36px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" height="44" style="display:block"><rect x="0" y="2" width="22" height="22" fill="#00b4a0"/><polygon points="26,24 48,24 37,2" fill="#F5C518"/><circle cx="11" cy="39" r="11" fill="#F5C518"/><path d="M 37,28 A 11,11 0 0,0 37,50 Z" fill="#00b4a0"/><rect x="37" y="28" width="11" height="22" fill="#00b4a0"/><text x="56" y="26" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">HASC</text><text x="56" y="50" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">CENTER</text></svg></div>
+    <div class="header-right" id="nurse-header-actions" style="display:none">
+      
+      <div style="position:relative;display:inline-block;margin-right:216px">
+        <button onclick="toggleSwitcherMenu()" style="background:#fff;border:1px solid #e2e8f0;color:#374151;padding:6px 12px;border-radius:6px;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:600">
+          <span>⚡ Switch Portal</span>
+          <span style="font-size:.7rem">▼</span>
+        </button>
+        <div id="nurse-switcher-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);min-width:180px;z-index:1000">
+          <button onclick="switchPortal('nurse')" style="display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151;border-bottom:1px solid #f3f4f6">
+            👩‍⚕️ Nurse Portal
+          </button>
+          <button onclick="switchPortal('admin')" style="display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151">
+            🔑 Admin Portal
+          </button>
+        </div>
+      </div>
+
+      <span id="nurse-name-lbl" style="font-size:.88rem;color:#6b7280;font-weight:600"></span>
+      <button class="btn btn-secondary btn-sm" onclick="nurseLogout()">Sign Out</button>
+    </div>
+  </div>
+  <div id="nurse-login"><div class="login-box">
+    <div class="icon">👩‍⚕️</div><h2>Nurse Login</h2><p>PON Training Portal</p>
+    <div id="nurse-err" class="err"></div>
+    <div class="form-group" style="text-align:left"><label>Email Address</label><input type="email" id="nurse-email" placeholder="you@hasccenter.org"/></div>
+    <div class="form-group" style="text-align:left"><label>4-Digit PIN</label>
+      <div class="pin-group" id="nurse-pin-group">
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric"/>
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric"/>
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric"/>
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric"/>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="asyncCall(nurseLogin)"><span class="spinner" id="nurse-spin"></span> Sign In</button>
+    <button class="btn btn-secondary" style="width:100%;margin-top:10px" onclick="goHome()">← Back</button>
+  </div></div>
+  <div id="nurse-main" style="display:none">
+    <div class="container">
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-setup" onclick="switchNurseTab('setup')">📋 Setup Training</button>
+        <button class="tab-btn" id="tab-dash" onclick="switchNurseTab('dash')">📊 Dashboard</button>
+      </div>
+      <div id="nurse-setup-tab">
+        <div class="card"><h2>📋 Create Training Session</h2>
+          <div id="setup-alert"></div>
+          <div class="two-col">
+            <div class="form-group"><label>Residence Name *</label><select id="s-res" style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:.95rem;color:#374151;background:#fff"><option value="">-- Select Residence --</option><option value="1068 East 14th Street">1068 East 14th Street</option><option value="1503 East 14th Street">1503 East 14th Street</option><option value="19th Avenue - 4801">19th Avenue - 4801</option><option value="46th Street - 1327">46th Street - 1327</option><option value="46th Street - 1771 1st Fl">46th Street - 1771 1st Fl</option><option value="46th Street - 1771 2nd Fl">46th Street - 1771 2nd Fl</option><option value="48th Street - 1268">48th Street - 1268</option><option value="50th Street - 918">50th Street - 918</option><option value="53rd Street - 1038">53rd Street - 1038</option><option value="Avenue H - 824">Avenue H - 824</option><option value="Avenue I - 2802">Avenue I - 2802</option><option value="Avenue J - 1010">Avenue J - 1010</option><option value="Avenue J - 1014 6B">Avenue J - 1014 6B</option><option value="Avenue J - 1014 6F">Avenue J - 1014 6F</option><option value="Avenue K - 1010">Avenue K - 1010</option><option value="Avenue L - 1122">Avenue L - 1122</option><option value="Avenue S">Avenue S</option><option value="Bedford Avenue - 3245">Bedford Avenue - 3245</option><option value="Coney Island Ave - 2173">Coney Island Ave - 2173</option><option value="Crown Heights - 580">Crown Heights - 580</option><option value="Ditmas Avenue - 804">Ditmas Avenue - 804</option><option value="East 13th Street - 1857">East 13th Street - 1857</option><option value="East 21 - 2102 Ave I">East 21 - 2102 Ave I</option><option value="East 35th St - 1431">East 35th St - 1431</option><option value="East 36th Street - 3521">East 36th Street - 3521</option><option value="East 7th Street (Ave N)">East 7th Street (Ave N)</option><option value="East 8th Street - 536">East 8th Street - 536</option><option value="East 9th - 1367">East 9th - 1367</option><option value="Kings Highway - 2416">Kings Highway - 2416</option><option value="Mill Basin">Mill Basin</option><option value="Montgomery St (fmr Kingston Ave)">Montgomery St (fmr Kingston Ave)</option><option value="New York Avenue">New York Avenue</option><option value="Staten Island">Staten Island</option><option value="Webster Avenue - 373">Webster Avenue - 373</option></select></div>
+            <div class="form-group"><label>Individual Name *</label><input type="text" id="s-ind" placeholder="Individual being trained on"/></div>
+          </div>
+          <div class="form-group"><label>Video URL (ScreenPal) *</label><input type="text" id="s-video" placeholder="Paste full ScreenPal embed link"/></div>
+          <div class="card" style="background:#f8fafc;border:1px solid #e5e7eb;padding:20px;margin-top:20px">
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px">Quiz Questions (5 Required)</h3>
+            <div id="q-container"></div>
+            <button class="btn btn-secondary btn-sm" onclick="addQ()" style="margin-top:12px">+ Add Question</button>
+          </div>
+          <button class="btn btn-success" style="width:100%;margin-top:20px" onclick="asyncCall(createSession)">✅ Create Session &amp; Generate Link</button>
+        </div>
+        <div id="link-result" style="display:none;margin-top:24px" class="card">
+          <h2>✅ Session Created!</h2>
+          <p style="color:#6b7280;margin-bottom:16px">Share this link with the DSP to begin training.</p>
+          <div class="link-box">
+            <input type="text" id="link-val" readonly/>
+            <button class="btn btn-primary btn-sm" onclick="copyLink()">Copy Link</button>
+          </div>
+          <button class="btn btn-secondary" style="margin-top:16px" onclick="resetSetup()">+ Create Another</button>
+        </div>
+      </div>
+      <div id="nurse-dash-tab" style="display:none">
+        <div class="card">
+          <h2 style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap">
+            <span>📊 My Certificates</span>
+            <button class="btn btn-primary btn-sm" id="nurse-print-sel-btn" onclick="printSelected(false)" style="display:none">🖨️ Print Selected</button>
+          </h2>
+          <div class="filter-bar">
+            <div><label style="font-size:.8rem;font-weight:600;margin-bottom:4px;display:block">Residence</label><select id="f-res" onchange="filterCerts()"><option value="">All</option></select></div>
+            <div><label style="font-size:.8rem;font-weight:600;margin-bottom:4px;display:block">Date From</label><input type="date" id="f-from" onchange="filterCerts()"/></div>
+            <div><label style="font-size:.8rem;font-weight:600;margin-bottom:4px;display:block">Date To</label><input type="date" id="f-to" onchange="filterCerts()"/></div>
+            <div><label style="font-size:.8rem;font-weight:600;margin-bottom:4px;display:block">Search DSP</label><input type="text" id="f-search" placeholder="Name..." oninput="filterCerts()"/></div>
+          </div>
+          <div class="table-wrap"><table id="cert-table"><thead><tr><th><input type="checkbox" id="nurse-select-all" onchange="toggleSelectAll(false)"/></th><th>Date</th><th>Residence</th><th>Individual</th><th>DSP Name</th><th>Role</th><th>Score</th><th>Status</th><th>Actions</th></tr></thead><tbody id="cert-body"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="admin-portal" style="display:none">
+  <div class="header">
+    <div class="header-left" style="margin-left:72px;margin-top:36px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" height="44" style="display:block"><rect x="0" y="2" width="22" height="22" fill="#00b4a0"/><polygon points="26,24 48,24 37,2" fill="#F5C518"/><circle cx="11" cy="39" r="11" fill="#F5C518"/><path d="M 37,28 A 11,11 0 0,0 37,50 Z" fill="#00b4a0"/><rect x="37" y="28" width="11" height="22" fill="#00b4a0"/><text x="56" y="26" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">HASC</text><text x="56" y="50" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">CENTER</text></svg></div>
+    <div class="header-right" id="admin-header-actions" style="display:none">
+      
+      <div style="position:relative;display:inline-block;margin-right:216px">
+        <button onclick="toggleAdminSwitcherMenu()" style="background:#fff;border:1px solid #e2e8f0;color:#374151;padding:6px 12px;border-radius:6px;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:600">
+          <span>⚡ Switch Portal</span>
+          <span style="font-size:.7rem">▼</span>
+        </button>
+        <div id="admin-switcher-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);min-width:180px;z-index:1000">
+          <button onclick="switchPortal('nurse')" style="display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151;border-bottom:1px solid #f3f4f6">
+            👩‍⚕️ Nurse Portal
+          </button>
+          <button onclick="switchPortal('admin')" style="display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151">
+            🔑 Admin Portal
+          </button>
+        </div>
+      </div>
+
+      <span id="admin-name-lbl" style="font-size:.88rem;color:#6b7280;font-weight:600"></span>
+      <button class="btn btn-secondary btn-sm" onclick="adminLogout()">Sign Out</button>
+    </div>
+  </div>
+  <div id="admin-login"><div class="login-box">
+    <div class="icon">🔑</div><h2>Admin Login</h2><p>Staff Access Manager</p>
+    <div id="admin-err" class="err"></div>
+    <div class="form-group" style="text-align:left"><label>Username</label><input type="text" id="admin-user" placeholder="Your username"/></div>
+    <div class="form-group" style="text-align:left"><label>4-Digit PIN</label>
+      <div class="pin-group" id="admin-pin-group">
+        <input class="adm-pin" type="password" maxlength="1" inputmode="numeric"/>
+        <input class="adm-pin" type="password" maxlength="1" inputmode="numeric"/>
+        <input class="adm-pin" type="password" maxlength="1" inputmode="numeric"/>
+        <input class="adm-pin" type="password" maxlength="1" inputmode="numeric"/>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="asyncCall(adminLogin)"><span class="spinner" id="admin-spin"></span> Sign In</button>
+    <button class="btn btn-secondary" style="width:100%;margin-top:10px" onclick="goHome()">← Back</button>
+  </div></div>
+  <div id="admin-main" style="display:none">
+    <div class="admin-nav">
+      <span>Admin</span>
+      <button class="admin-nav-btn active" id="nav-dash" onclick="switchAdminTab('dash')">📊 Dashboard</button>
+      <button class="admin-nav-btn" id="nav-staff" onclick="switchAdminTab('staff')">👥 Manage Staff</button>
+      <button class="admin-nav-btn" id="nav-admins" onclick="switchAdminTab('admins')">🔐 Manage Admins</button>
+      <button class="admin-nav-btn" id="nav-home" onclick="goHome()" style="margin-left:auto">🏠 Home</button>
+    </div>
+    <div class="container">
+      <div id="admin-dash-tab">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="num" id="a-total">0</div><div class="lbl">Total Certificates</div></div>
+          <div class="stat-card"><div class="num" id="a-pass">0</div><div class="lbl">Passed</div></div>
+          <div class="stat-card"><div class="num" id="a-fail">0</div><div class="lbl">Failed</div></div>
+          <div class="stat-card"><div class="num" id="a-today">0</div><div class="lbl">Today</div></div>
+        </div>
+        <div class="card">
+          <h2 style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap">
+            <span>📜 All Certificates</span>
+            <button class="btn btn-primary btn-sm" id="admin-print-sel-btn" onclick="printSelected(true)" style="display:none">🖨️ Print Selected</button>
+          </h2>
+          <div class="filter-bar">
+            <div><label style="font-size:.8rem;font-weight:600;margin-bottom:4px;display:block">Residence</label><select id="af-res" onchange="filterACerts()"><option value="">All</option></select></div>
+            <div><label style="font-size:.8rem;font-weight:600;margin-bottom:4px;display:block">Date From</label><input type="date" id="af-from" onchange="filterACerts()"/></div>
+            <div><label style="font-size:.8rem;font-weight:600;margin-bottom:4px;display:block">Date To</label><input type="date" id="af-to" onchange="filterACerts()"/></div>
+            <div><label style="font-size:.8rem;font-weight:600;margin-bottom:4px;display:block">Search DSP</label><input type="text" id="af-search" placeholder="Name..." oninput="filterACerts()"/></div>
+          </div>
+          <div class="table-wrap"><table id="admin-cert-table"><thead><tr><th><input type="checkbox" id="admin-select-all" onchange="toggleSelectAll(true)"/></th><th>Date</th><th>Nurse</th><th>Residence</th><th>Individual</th><th>DSP Name</th><th>Role</th><th>Score</th><th>Status</th><th>Actions</th></tr></thead><tbody id="admin-cert-body"></tbody></table></div>
+        </div>
+      </div>
+      <div id="admin-staff-tab" style="display:none">
+        <div class="card">
+          <h2>👥 Manage Nurse Staff</h2>
+          <div class="info-banner">✨ <strong>Add a nurse:</strong> Fill the form below and click Add. The nurse will receive email + PIN credentials for the PON Training Portal.</div>
+          <div class="form-section">
+            <h3>➕ Add New Nurse</h3>
+            <div id="add-nurse-alert"></div>
+            <div class="two-col">
+              <div class="form-group"><label>Full Name *</label><input type="text" id="new-name" placeholder="e.g. Jane Smith"/></div>
+              <div class="form-group"><label>Email *</label><input type="email" id="new-email" placeholder="jsmith@hasccenter.org"/></div>
+            </div>
+            <div class="form-group"><label>Create 4-Digit PIN *</label>
+              <div class="pin-group" id="new-pin-group">
+                <input class="new-pin" type="password" maxlength="1" inputmode="numeric"/>
+                <input class="new-pin" type="password" maxlength="1" inputmode="numeric"/>
+                <input class="new-pin" type="password" maxlength="1" inputmode="numeric"/>
+                <input class="new-pin" type="password" maxlength="1" inputmode="numeric"/>
+              </div>
+            </div>
+            <button class="btn btn-success" onclick="asyncCall(addNurse)">✅ Add Nurse</button>
+          </div>
+          <div class="pon-card">
+            <div class="pon-card-hdr"><h2>All Nurses <span class="badge-count" id="nurse-count">0</span></h2></div>
+            <div id="nurse-list" style="padding:16px"></div>
+          </div>
+        </div>
+      </div>
+      <div id="admin-admins-tab" style="display:none">
+        <div class="card">
+          <h2>🔐 Manage Admin Accounts</h2>
+          <div class="info-banner">🔐 <strong>Admin accounts:</strong> Can access the Staff Access Manager portal. The owner account (mshilcrat) cannot be removed.</div>
+          <div class="form-section">
+            <h3>➕ Add New Admin</h3>
+            <div id="add-admin-alert"></div>
+            <div class="two-col">
+              <div class="form-group"><label>Username *</label><input type="text" id="new-admin-user" placeholder="e.g. jdoe"/></div>
+              <div class="form-group"><label>Email *</label><input type="email" id="new-admin-email" placeholder="jdoe@hasccenter.org"/></div>
+            </div>
+            <div class="form-group"><label>Create 4-Digit PIN *</label>
+              <div class="pin-group" id="new-admin-pin-group">
+                <input class="admin-new-pin" type="password" maxlength="1" inputmode="numeric"/>
+                <input class="admin-new-pin" type="password" maxlength="1" inputmode="numeric"/>
+                <input class="admin-new-pin" type="password" maxlength="1" inputmode="numeric"/>
+                <input class="admin-new-pin" type="password" maxlength="1" inputmode="numeric"/>
+              </div>
+            </div>
+            <button class="btn btn-success" onclick="asyncCall(addAdmin)">✅ Add Admin</button>
+          </div>
+          <div class="pon-card">
+            <div class="pon-card-hdr"><h2>All Admins <span class="badge-count" id="admin-count">0</span></h2></div>
+            <div id="admin-list" style="padding:16px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="cert-modal" class="modal"><div class="modal-content">
+  <button class="modal-close" onclick="closeCert()">×</button>
+  <div id="cert-content"></div>
+</div></div>
+<script>
+const SUPA_URL='https://xqcykvgsesavtuautivq.supabase.co';
+const SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY3lrdmdlc2F2dHVhdXRpdnEiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczNTAzODAxMiwiZXhwIjoyMDUwNjE0MDEyfQ.u0pZRx1Qr4PZWQY0-1sZSzTyQEF-Pu0mjzvk79VNxc0';
+const sb=supabase.createClient(SUPA_URL,SUPA_ANON);
+const ADMIN_HARDCODE={username:'mshilcrat',email:'mshilcrat@hasccenter.org',pin:'1147'};
+const NURSES=[
+  {email:'mshilcrat@hasccenter.org',name:'Michael Shilcrat',pin:'9979'},
+  {email:'fziskind@hasccenter.org',name:'Frumie Ziskind',pin:'2006'},
+  {email:'mshilcrat@gmail.com',name:'mshilcrat',pin:'2508'},
+  {email:'avisacks@hasccenter.org',name:'Avi Sacks',pin:'2803'},
+  {email:'ssinger@hasccenter.org',name:'Shmuel Singer',pin:'4124'},
+  {email:'llebovits@hasccenter.org',name:'Leedor Lebovits',pin:'1817'}
+];
+let currentNurse=null,currentAdminUser=null,certs=[],aCerts=[],qCount=0,selectedCerts=[],selectedAdminCerts=[];
+function showPortal(p){document.getElementById('homepage').style.display='none';if(p==='nurse'){document.getElementById('nurse-portal').style.display='block';}else{document.getElementById('admin-portal').style.display='block';}}
+function goHome(){document.getElementById('nurse-portal').style.display='none';document.getElementById('admin-portal').style.display='none';document.getElementById('homepage').style.display='block';nurseLogout();adminLogout();const nurseMenu=document.getElementById('nurse-switcher-menu');const adminMenu=document.getElementById('admin-switcher-menu');if(nurseMenu)nurseMenu.style.display='none';if(adminMenu)adminMenu.style.display='none';}
+function toggleSwitcherMenu(){const menu=document.getElementById('nurse-switcher-menu');if(menu){menu.style.display=menu.style.display==='none'?'block':'none';}}
+function toggleAdminSwitcherMenu(){const menu=document.getElementById('admin-switcher-menu');if(menu){menu.style.display=menu.style.display==='none'?'block':'none';}}
+function switchPortal(target){if(target==='nurse'){document.getElementById('admin-portal').style.display='none';document.getElementById('nurse-portal').style.display='block';adminLogout();}else{document.getElementById('nurse-portal').style.display='none';document.getElementById('admin-portal').style.display='block';nurseLogout();}const nurseMenu=document.getElementById('nurse-switcher-menu');const adminMenu=document.getElementById('admin-switcher-menu');if(nurseMenu)nurseMenu.style.display='none';if(adminMenu)adminMenu.style.display='none';}
+document.addEventListener('click',function(e){const nurseMenu=document.getElementById('nurse-switcher-menu');const adminMenu=document.getElementById('admin-switcher-menu');const nurseBtn=e.target.closest('button[onclick="toggleSwitcherMenu()"]');const adminBtn=e.target.closest('button[onclick="toggleAdminSwitcherMenu()"]');if(!nurseBtn&&nurseMenu&&!nurseMenu.contains(e.target)){nurseMenu.style.display='none';}if(!adminBtn&&adminMenu&&!adminMenu.contains(e.target)){adminMenu.style.display='none';}});
+function asyncCall(fn){return fn();}
+(function(){const grp=document.getElementById('nurse-pin-group');if(grp){const pins=grp.querySelectorAll('.pin-digit');pins.forEach((p,i)=>{p.addEventListener('input',()=>{if(p.value.length===1&&i<pins.length-1)pins[i+1].focus();});p.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!p.value&&i>0)pins[i-1].focus();});});}})();
+(function(){const grp=document.getElementById('admin-pin-group');if(grp){const pins=grp.querySelectorAll('.adm-pin');pins.forEach((p,i)=>{p.addEventListener('input',()=>{if(p.value.length===1&&i<pins.length-1)pins[i+1].focus();});p.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!p.value&&i>0)pins[i-1].focus();});});}})();
+(function(){const grp=document.getElementById('new-pin-group');if(grp){const pins=grp.querySelectorAll('.new-pin');pins.forEach((p,i)=>{p.addEventListener('input',()=>{if(p.value.length===1&&i<pins.length-1)pins[i+1].focus();});p.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!p.value&&i>0)pins[i-1].focus();});});}})();
+(function(){const grp=document.getElementById('new-admin-pin-group');if(grp){const pins=grp.querySelectorAll('.admin-new-pin');pins.forEach((p,i)=>{p.addEventListener('input',()=>{if(p.value.length===1&&i<pins.length-1)pins[i+1].focus();});p.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!p.value&&i>0)pins[i-1].focus();});});}})();
+async function nurseLogin(){const email=document.getElementById('nurse-email').value.trim().toLowerCase();const pinInputs=document.querySelectorAll('#nurse-pin-group .pin-digit');const pin=Array.from(pinInputs).map(i=>i.value).join('');const err=document.getElementById('nurse-err');err.style.display='none';err.textContent='';if(!email||pin.length!==4){err.textContent='Please enter email and 4-digit PIN.';err.style.display='block';return;}const n=NURSES.find(x=>x.email===email&&x.pin===pin);if(!n){err.textContent='Invalid credentials.';err.style.display='block';return;}currentNurse=n;document.getElementById('nurse-login').style.display='none';document.getElementById('nurse-main').style.display='block';document.getElementById('nurse-header-actions').style.display='flex';document.getElementById('nurse-name-lbl').textContent=n.name;addQ();addQ();addQ();addQ();addQ();await loadCerts();}
+function nurseLogout(){currentNurse=null;document.getElementById('nurse-main').style.display='none';document.getElementById('nurse-login').style.display='block';document.getElementById('nurse-header-actions').style.display='none';document.getElementById('nurse-email').value='';const pinInputs=document.querySelectorAll('#nurse-pin-group .pin-digit');pinInputs.forEach(p=>p.value='');resetSetup();}
+async function adminLogin(){const user=document.getElementById('admin-user').value.trim().toLowerCase();const pinInputs=document.querySelectorAll('#admin-pin-group .adm-pin');const pin=Array.from(pinInputs).map(i=>i.value).join('');const err=document.getElementById('admin-err');err.style.display='none';err.textContent='';if(!user||pin.length!==4){err.textContent='Please enter username and PIN.';err.style.display='block';return;}if(user===ADMIN_HARDCODE.username&&pin===ADMIN_HARDCODE.pin){currentAdminUser={username:user,email:ADMIN_HARDCODE.email,role:'owner'};document.getElementById('admin-login').style.display='none';document.getElementById('admin-main').style.display='block';document.getElementById('admin-header-actions').style.display='flex';document.getElementById('admin-name-lbl').textContent=user;await loadAdmin();return;}err.textContent='Invalid admin credentials.';err.style.display='block';}
+function adminLogout(){currentAdminUser=null;document.getElementById('admin-main').style.display='none';document.getElementById('admin-login').style.display='block';document.getElementById('admin-header-actions').style.display='none';document.getElementById('admin-user').value='';const pinInputs=document.querySelectorAll('#admin-pin-group .adm-pin');pinInputs.forEach(p=>p.value='');}
+function switchNurseTab(t){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));if(t==='setup'){document.getElementById('tab-setup').classList.add('active');document.getElementById('nurse-setup-tab').style.display='block';document.getElementById('nurse-dash-tab').style.display='none';}else{document.getElementById('tab-dash').classList.add('active');document.getElementById('nurse-dash-tab').style.display='block';document.getElementById('nurse-setup-tab').style.display='none';loadCerts();}}
+function switchAdminTab(t){document.querySelectorAll('.admin-nav-btn').forEach(b=>b.classList.remove('active'));if(t==='dash'){document.getElementById('nav-dash').classList.add('active');document.getElementById('admin-dash-tab').style.display='block';document.getElementById('admin-staff-tab').style.display='none';document.getElementById('admin-admins-tab').style.display='none';loadAdmin();}else if(t==='staff'){document.getElementById('nav-staff').classList.add('active');document.getElementById('admin-dash-tab').style.display='none';document.getElementById('admin-staff-tab').style.display='block';document.getElementById('admin-admins-tab').style.display='none';loadNurseList();}else if(t==='admins'){document.getElementById('nav-admins').classList.add('active');document.getElementById('admin-dash-tab').style.display='none';document.getElementById('admin-staff-tab').style.display='none';document.getElementById('admin-admins-tab').style.display='block';loadAdminList();}}
+function addQ(){qCount++;const c=document.getElementById('q-container');const d=document.createElement('div');d.className='question-builder';d.innerHTML=`<h4>Question ${qCount}</h4><div class="form-group"><input type="text" class="q-text" placeholder="Enter question text..."/></div><div class="options-grid"><div class="option-row"><input type="text" class="q-opt" data-letter="A" placeholder="Option A"/><input type="radio" name="q${qCount}" value="A"/><span class="correct-label">Correct</span></div><div class="option-row"><input type="text" class="q-opt" data-letter="B" placeholder="Option B"/><input type="radio" name="q${qCount}" value="B"/><span class="correct-label">Correct</span></div><div class="option-row"><input type="text" class="q-opt" data-letter="C" placeholder="Option C"/><input type="radio" name="q${qCount}" value="C"/><span class="correct-label">Correct</span></div><div class="option-row"><input type="text" class="q-opt" data-letter="D" placeholder="Option D"/><input type="radio" name="q${qCount}" value="D"/><span class="correct-label">Correct</span></div></div>`;c.appendChild(d);}
+async function createSession(){const alert=document.getElementById('setup-alert');alert.innerHTML='';const res=document.getElementById('s-res').value;const ind=document.getElementById('s-ind').value.trim();const video=document.getElementById('s-video').value.trim();if(!res||!ind||!video){alert.innerHTML='<div class="alert alert-error">Please fill all required fields.</div>';return;}const qs=[];const qNodes=document.querySelectorAll('.question-builder');if(qNodes.length<5){alert.innerHTML='<div class="alert alert-error">You must add exactly 5 questions.</div>';return;}for(let i=0;i<qNodes.length;i++){const n=qNodes[i];const txt=n.querySelector('.q-text').value.trim();const opts=n.querySelectorAll('.q-opt');const optA=opts[0].value.trim(),optB=opts[1].value.trim(),optC=opts[2].value.trim(),optD=opts[3].value.trim();const corr=n.querySelector('input[type=radio]:checked');if(!txt||!optA||!optB||!optC||!optD||!corr){alert.innerHTML='<div class="alert alert-error">Please complete all 5 questions with text, options, and correct answer.</div>';return;}qs.push({question:txt,optionA:optA,optionB:optB,optionC:optC,optionD:optD,correctOption:corr.value});}const token=crypto.randomUUID();const{data,error}=await sb.from('training_sessions').insert({nurse_email:currentNurse.email,residence:res,individual_name:ind,video_url:video,questions:qs,session_token:token,status:'active'}).select().single();if(error){alert.innerHTML='<div class="alert alert-error">Error creating session: '+error.message+'</div>';return;}const link=window.location.origin+window.location.pathname.replace('index.html','')+'dsp-training.html?token='+token;document.getElementById('link-val').value=link;document.getElementById('link-result').style.display='block';document.querySelector('#nurse-setup-tab .card').style.display='none';}
+function resetSetup(){document.getElementById('link-result').style.display='none';document.querySelector('#nurse-setup-tab .card').style.display='block';document.getElementById('s-res').value='';document.getElementById('s-ind').value='';document.getElementById('s-video').value='';qCount=0;document.getElementById('q-container').innerHTML='';addQ();addQ();addQ();addQ();addQ();}
+function copyLink(){const inp=document.getElementById('link-val');inp.select();document.execCommand('copy');alert('Link copied to clipboard!');}
+async function loadCerts(){if(!currentNurse)return;const{data,error}=await sb.from('certificates').select('*').eq('nurse_email',currentNurse.email).order('completed_at',{ascending:false});if(error){console.error(error);return;}certs=data||[];renderCerts();const resSet=new Set(certs.map(c=>c.residence).filter(Boolean));const sel=document.getElementById('f-res');sel.innerHTML='<option value="">All</option>';resSet.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;sel.appendChild(o);});}
+function renderCerts(){const filtered=certs.filter(c=>{const fRes=document.getElementById('f-res').value;const fFrom=document.getElementById('f-from').value;const fTo=document.getElementById('f-to').value;const fSearch=document.getElementById('f-search').value.trim().toLowerCase();if(fRes&&c.residence!==fRes)return false;if(fFrom&&new Date(c.completed_at)<new Date(fFrom))return false;if(fTo&&new Date(c.completed_at)>new Date(fTo))return false;if(fSearch&&!c.dsp_name.toLowerCase().includes(fSearch))return false;return true;});const tbody=document.getElementById('cert-body');tbody.innerHTML='';filtered.forEach(c=>{const tr=document.createElement('tr');tr.innerHTML=`<td><input type="checkbox" class="cert-check" data-id="${c.id}" onchange="toggleCertSelection(false)"/></td><td>${fd(c.completed_at)}</td><td>${c.residence||'—'}</td><td>${c.individual_name||'—'}</td><td>${c.dsp_name}</td><td>${c.dsp_title||'—'}</td><td>${c.score}/5</td><td><span class="badge ${c.passed?'badge-pass':'badge-fail'}">${c.passed?'✅ Pass':'❌ Fail'}</span></td><td><button class="btn btn-primary btn-sm" onclick="viewCert('${c.id}',false)">View</button> <button class="btn btn-danger btn-sm" onclick="deleteCert('${c.id}')">Delete</button></td>`;tbody.appendChild(tr);});document.getElementById('nurse-select-all').checked=false;selectedCerts=[];updatePrintButton(false);}
+function filterCerts(){renderCerts();}
+async function loadAdmin(){if(!currentAdminUser)return;const{data,error}=await sb.from('certificates').select('*').order('completed_at',{ascending:false});if(error){console.error(error);return;}aCerts=data||[];renderACerts();const resSet=new Set(aCerts.map(c=>c.residence).filter(Boolean));const sel=document.getElementById('af-res');sel.innerHTML='<option value="">All</option>';resSet.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;sel.appendChild(o);});const total=aCerts.length;const passed=aCerts.filter(c=>c.passed).length;const failed=aCerts.filter(c=>!c.passed).length;const today=aCerts.filter(c=>new Date(c.completed_at).toDateString()===new Date().toDateString()).length;document.getElementById('a-total').textContent=total;document.getElementById('a-pass').textContent=passed;document.getElementById('a-fail').textContent=failed;document.getElementById('a-today').textContent=today;}
+function renderACerts(){const filtered=aCerts.filter(c=>{const fRes=document.getElementById('af-res').value;const fFrom=document.getElementById('af-from').value;const fTo=document.getElementById('af-to').value;const fSearch=document.getElementById('af-search').value.trim().toLowerCase();if(fRes&&c.residence!==fRes)return false;if(fFrom&&new Date(c.completed_at)<new Date(fFrom))return false;if(fTo&&new Date(c.completed_at)>new Date(fTo))return false;if(fSearch&&!c.dsp_name.toLowerCase().includes(fSearch))return false;return true;});const tbody=document.getElementById('admin-cert-body');tbody.innerHTML='';filtered.forEach(c=>{const tr=document.createElement('tr');tr.innerHTML=`<td><input type="checkbox" class="cert-check" data-id="${c.id}" onchange="toggleCertSelection(true)"/></td><td>${fd(c.completed_at)}</td><td>${c.nurse_email}</td><td>${c.residence||'—'}</td><td>${c.individual_name||'—'}</td><td>${c.dsp_name}</td><td>${c.dsp_title||'—'}</td><td>${c.score}/5</td><td><span class="badge ${c.passed?'badge-pass':'badge-fail'}">${c.passed?'✅ Pass':'❌ Fail'}</span></td><td><button class="btn btn-primary btn-sm" onclick="viewCert('${c.id}',true)">View</button> <button class="btn btn-danger btn-sm" onclick="deleteCert('${c.id}')">Delete</button></td>`;tbody.appendChild(tr);});document.getElementById('admin-select-all').checked=false;selectedAdminCerts=[];updatePrintButton(true);if(window.setupDeleteButtons){window.setupDeleteButtons();}if(window.updateAdminCounts){window.updateAdminCounts();}}
+function filterACerts(){renderACerts();}
+function fd(d){if(!d)return'—';const dt=new Date(d);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function viewCert(id,isAdmin){const source=isAdmin?aCerts:certs;const c=source.find(x=>x.id===id);if(!c)return;const content=document.getElementById('cert-content');content.innerHTML=`<div class="cert-box"><div style="font-size:2rem;margin-bottom:8px">🏆</div><div class="cert-title">Certificate of Completion</div><div class="cert-org">HASC Center — PON Training Program</div><p style="margin-bottom:8px;color:#374151">This certifies that</p><div class="cert-name">${c.dsp_name}</div><div class="cert-detail">Role: <strong>${c.dsp_title||'—'}</strong></div>${isAdmin?'<div class="cert-detail">Nurse: <strong>'+c.nurse_email+'</strong></div>':''}<div class="cert-detail">Residence: <strong>${c.residence||'—'}</strong></div><div class="cert-detail">Individual: <strong>${c.individual_name||'—'}</strong></div><div class="cert-score">Score: ${c.score}/5 (${Math.round((c.score/5)*100)}%)</div><div class="cert-detail" style="margin-top:8px;color:#9ca3af;font-size:0.8rem">Completed: ${fd(c.completed_at)}</div><div class="badge ${c.passed?'badge-pass':'badge-fail'}">${c.passed?'✅ PASSED':'❌ FAILED'}</div></div>`;document.getElementById('cert-modal').classList.add('open');}
+function closeCert(){document.getElementById('cert-modal').classList.remove('open');}
+
+async function deleteCert(id) {
+  if (!confirm('Are you sure you want to delete this certificate? This action cannot be undone.')) {
+    return;
+  }
+  try {
+    const { error } = await sb.from('certificates').delete().eq('id', id);
+    if (error) throw error;
+    
+    // Determine which view is active by checking which portal is visible
+    const adminPortalVisible = document.getElementById('admin-portal').style.display !== 'none';
+    const adminDashVisible = document.getElementById('admin-dash-tab') && 
+                             document.getElementById('admin-dash-tab').style.display !== 'none';
+    
+    // If in admin portal AND dashboard is visible, reload admin view
+    if (adminPortalVisible && adminDashVisible) {
+      await loadAdmin();
+    } else {
+      // Otherwise reload nurse view
+      await loadCerts();
+    }
+    
+    alert('Certificate deleted successfully.');
+  } catch (e) {
+    alert('Failed to delete: ' + e.message);
+  }
+}
+
+function toggleSelectAll(isAdmin){const checkboxes=document.querySelectorAll(isAdmin?'#admin-cert-table .cert-check':'#cert-table .cert-check');const selectAll=document.getElementById(isAdmin?'admin-select-all':'nurse-select-all');checkboxes.forEach(cb=>cb.checked=selectAll.checked);toggleCertSelection(isAdmin);}
+function toggleCertSelection(isAdmin){const checkboxes=document.querySelectorAll(isAdmin?'#admin-cert-table .cert-check':'#cert-table .cert-check');const selected=Array.from(checkboxes).filter(cb=>cb.checked).map(cb=>cb.dataset.id);if(isAdmin){selectedAdminCerts=selected;}else{selectedCerts=selected;}updatePrintButton(isAdmin);}
+function updatePrintButton(isAdmin){const btn=document.getElementById(isAdmin?'admin-print-sel-btn':'nurse-print-sel-btn');const selected=isAdmin?selectedAdminCerts:selectedCerts;if(btn){if(selected.length>0){btn.style.display='inline-flex';}else{btn.style.display='none';}}}
+function printSelected(isAdmin){const selected=isAdmin?selectedAdminCerts:selectedCerts;const source=isAdmin?aCerts:certs;if(selected.length===0){alert('Please select at least one certificate to print.');return;}const certsToP=source.filter(c=>selected.includes(c.id));const printWindow=window.open('','_blank');printWindow.document.write(`<!DOCTYPE html><html><head><title>HASC Certificates</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Segoe UI',Arial,sans-serif}@page{size:portrait;margin:0.5in}.cert-box{page-break-after:always;page-break-inside:avoid;background:linear-gradient(135deg,#f0f9ff,#e0f7fa);border:3px solid #00b4a0;border-radius:16px;padding:40px;text-align:center;max-width:7.5in;margin:0 auto 0.5in}.cert-box:last-child{page-break-after:auto}.cert-title{font-size:1.6rem;font-weight:800;color:#00b4a0;margin-bottom:4px}.cert-org{font-size:0.9rem;color:#6b7280;margin-bottom:16px}.cert-name{font-size:1.5rem;font-weight:800;color:#1a202c;border-bottom:2px solid #00b4a0;padding-bottom:8px;margin-bottom:12px}.cert-detail{font-size:0.92rem;color:#374151;margin-bottom:4px}.cert-score{font-size:1.1rem;font-weight:700;color:#00b4a0;margin-top:10px}.badge{display:inline-block;padding:8px 20px;font-size:0.92rem;font-weight:700;border-radius:8px;margin-top:16px}.badge-pass{background:#d1fae5;color:#065f46}.badge-fail{background:#fee2e2;color:#991b1b}.pon-card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:20px;overflow:hidden}.pon-card-hdr{background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}.pon-card-hdr h2{font-size:1rem;font-weight:700;margin:0;text-transform:uppercase;letter-spacing:.5px}.pon-label{display:block;font-size:.85rem;font-weight:600;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}.pon-input{width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.95rem;transition:border-color .2s}.pon-input:focus{outline:none;border-color:#00b4a0}.badge-count{background:#e6faf8;color:#00b4a0;border:1px solid #00b4a0;padding:2px 12px;border-radius:20px;font-size:.75rem;font-weight:700;margin-left:8px}.pin-display{background:#f0fdfa;color:#00b4a0;font-weight:700;font-family:monospace;padding:4px 12px;border-radius:6px;font-size:.9rem;border:1px solid #99f6e4}.action-btn-group{display:flex;gap:6px}.btn-deactivate{background:#fff;border:1.5px solid #e2e8f0;color:#64748b;padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer}.btn-deactivate:hover{background:#f8fafc;border-color:#cbd5e1}.btn-remove{background:#ef4444;border:none;color:#fff;padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer}.btn-remove:hover{background:#dc2626}.info-banner{background:#e6faf8;border-left:4px solid #00b4a0;border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:.88rem;line-height:1.6;color:#0f766e}</style></head><body>${certsToP.map(c=>`<div class="cert-box"><div style="font-size:2rem;margin-bottom:8px">🏆</div><div class="cert-title">Certificate of Completion</div><div class="cert-org">HASC Center — PON Training Program</div><p style="margin-bottom:8px;color:#374151">This certifies that</p><div class="cert-name">${c.dsp_name}</div><div class="cert-detail">Role: <strong>${c.dsp_title||'—'}</strong></div>${isAdmin?'<div class="cert-detail">Nurse: <strong>'+c.nurse_email+'</strong></div>':''}<div class="cert-detail">Residence: <strong>${c.residence||'—'}</strong></div><div class="cert-detail">Individual: <strong>${c.individual_name||'—'}</strong></div><div class="cert-score">Score: ${c.score}/5 (${Math.round((c.score/5)*100)}%)</div><div class="cert-detail" style="margin-top:8px;color:#9ca3af;font-size:0.8rem">Completed: ${fd(c.completed_at)}</div><div class="badge ${c.passed?'badge-pass':'badge-fail'}">${c.passed?'✅ PASSED':'❌ FAILED'}</div></div>`).join('')}</body></html>`);printWindow.document.close();setTimeout(()=>{printWindow.print();},250);}
+async function loadNurseList(){const list=document.getElementById('nurse-list');const count=document.getElementById('nurse-count');count.textContent=NURSES.length;list.innerHTML='';NURSES.forEach(n=>{const card=document.createElement('div');card.className='user-card';card.innerHTML=`<div class="uinfo"><div class="uname">${n.name}</div><div class="uemail">${n.email}</div></div><div class="uactions"><span class="pin-display">PIN: ${n.pin}</span></div>`;list.appendChild(card);});}
+async function addNurse(){const alert=document.getElementById('add-nurse-alert');alert.innerHTML='';const name=document.getElementById('new-name').value.trim();const email=document.getElementById('new-email').value.trim();const pinInputs=document.querySelectorAll('#new-pin-group .new-pin');const pin=Array.from(pinInputs).map(i=>i.value).join('');if(!name||!email||pin.length!==4){alert.innerHTML='<div class="alert alert-error">Please fill all fields.</div>';return;}if(NURSES.find(n=>n.email===email)){alert.innerHTML='<div class="alert alert-error">Nurse with this email already exists.</div>';return;}NURSES.push({name,email,pin});alert.innerHTML='<div class="alert alert-success">Nurse added successfully!</div>';document.getElementById('new-name').value='';document.getElementById('new-email').value='';pinInputs.forEach(p=>p.value='');loadNurseList();}
+async function loadAdminList(){const list=document.getElementById('admin-list');const count=document.getElementById('admin-count');const admins=[{username:ADMIN_HARDCODE.username,email:ADMIN_HARDCODE.email,pin:ADMIN_HARDCODE.pin,role:'owner'}];count.textContent=admins.length;list.innerHTML='';admins.forEach(a=>{const card=document.createElement('div');card.className='user-card';card.innerHTML=`<div class="uinfo"><div class="uname">${a.username}${a.role==='owner'?' <span class="badge badge-active">Owner</span>':''}</div><div class="uemail">${a.email}</div></div><div class="uactions"><span class="pin-display">PIN: ${a.pin}</span></div>`;list.appendChild(card);});}
+async function addAdmin(){const alert=document.getElementById('add-admin-alert');alert.innerHTML='';const user=document.getElementById('new-admin-user').value.trim();const email=document.getElementById('new-admin-email').value.trim();const pinInputs=document.querySelectorAll('#new-admin-pin-group .admin-new-pin');const pin=Array.from(pinInputs).map(i=>i.value).join('');if(!user||!email||pin.length!==4){alert.innerHTML='<div class="alert alert-error">Please fill all fields.</div>';return;}alert.innerHTML='<div class="alert alert-info">Admin account creation will be available once the admin_accounts table is set up in Supabase.</div>';}
+document.addEventListener('DOMContentLoaded',()=>{document.getElementById('homepage').style.display='block';});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- 1. Function to Update Dashboard Counts ---
+    function updateAdminCounts() {
+        const table = document.getElementById('admin-cert-table');
+        if (!table) return;
+        const rows = table.querySelectorAll('tbody tr');
+        let total = rows.length;
+        let passed = 0;
+        let failed = 0;
+        rows.forEach(row => {
+            // Assuming Status is the 8th column (index 7). Adjust if your columns differ.
+            const statusCell = row.cells[7]; 
+            if (statusCell) {
+                const text = statusCell.textContent.trim().toLowerCase();
+                if (text.includes('pass')) passed++;
+                if (text.includes('fail')) failed++;
+            }
+        });
+        // Update the HTML elements with new counts
+        const totalEl = document.getElementById('a-total');
+        const passedEl = document.getElementById('a-pass');
+        const failedEl = document.getElementById('a-fail');
+        if (totalEl) totalEl.textContent = total;
+        if (passedEl) passedEl.textContent = passed;
+        if (failedEl) failedEl.textContent = failed;
+    }
+    // --- 2. Function to Handle Deletion ---
+    function setupDeleteButtons() {
+        // Select all delete buttons within the admin certificate table
+        const deleteButtons = document.querySelectorAll('#admin-cert-table .delete-btn');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent any default form action
+                
+                // Ask for confirmation
+                if (!confirm('Are you sure you want to permanently delete this certificate?')) {
+                    return;
+                }
+                // Find the row (tr) associated with this button
+                const row = this.closest('tr');
+                
+                if (row) {
+                    // A. Remove from Visual Table (DOM)
+                    row.remove();
+                    // B. Update the Counts immediately
+                    updateAdminCounts();
+                    // C. (Optional) Remove from LocalStorage if you are using it
+                    // If your app saves data to localStorage under 'hasc_certificates'
+                    try {
+                        const storedData = localStorage.getItem('hasc_certificates');
+                        if (storedData) {
+                            let certs = JSON.parse(storedData);
+                            // We assume each row might have a data-id, or we filter by content
+                            // For now, this just ensures the visual part works. 
+                            // To persist, you'd need unique IDs on each row.
+                        }
+                    } catch (err) {
+                        console.log("LocalStorage not configured or error:", err);
+                    }
+                }
+            });
+        });
+    }
+    // --- 3. This function will be called by renderACerts after buttons are created ---
+});
+
+// Make setupDeleteButtons global so renderACerts can call it
+window.setupDeleteButtons = function() {
+    const deleteButtons = document.querySelectorAll('#admin-cert-table .delete-btn');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (!confirm('Are you sure you want to permanently delete this certificate?')) {
+                return;
+            }
+            const row = this.closest('tr');
+            if (row) {
+                row.remove();
+                updateAdminCounts();
+            }
+        });
+    });
+};
+
+// Make updateAdminCounts global too
+window.updateAdminCounts = function() {
+    const table = document.getElementById('admin-cert-table');
+    if (!table) return;
+    const rows = table.querySelectorAll('tbody tr');
+    let total = rows.length;
+    let passed = 0;
+    let failed = 0;
+    rows.forEach(row => {
+        const statusCell = row.cells[7];
+        if (statusCell) {
+            const text = statusCell.textContent.trim().toLowerCase();
+            if (text.includes('pass')) passed++;
+            if (text.includes('fail')) failed++;
+        }
+    });
+    const totalEl = document.getElementById('a-total');
+    const passedEl = document.getElementById('a-pass');
+    const failedEl = document.getElementById('a-fail');
+    if (totalEl) totalEl.textContent = total;
+    if (passedEl) passedEl.textContent = passed;
+    if (failedEl) failedEl.textContent = failed;
+};
+</script>
+</body>
+</html>
