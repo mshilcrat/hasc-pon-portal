@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HASC Center - DSP Training</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+  *{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;min-height:100vh}
+.header{background:#fff;border-bottom:3px solid #00b4a0;padding:10px 24px;display:flex;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.container{max-width:800px;margin:32px auto;padding:0 16px}
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:32px;margin-bottom:24px}
+.card h2{font-size:1.2rem;font-weight:700;margin-bottom:16px;color:#1a202c}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:8px;font-weight:600;font-size:.95rem;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:#00b4a0;color:#fff}.btn-primary:hover{background:#009688}
+.btn-success{background:#059669;color:#fff}.btn-success:hover{background:#047857}
+.btn-secondary{background:#f3f4f6;color:#374151;border:1px solid #d1d5db}
+  .alert{padding:12px 16px;border-radius:8px;font-size:.9rem;margin-bottom:16px}
+.alert-error{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626}
+.alert-success{background:#f0fdf4;border:1px solid #86efac;color:#15803d}
+  .alert-info{background:#eff6ff;border:1px solid #93c5fd;color:#1d4ed8}
+  .form-group{margin-bottom:16px}
+  .form-group label{display:block;font-weight:600;font-size:.88rem;margin-bottom:6px;color:#374151}
+.form-group input,.form-group select{width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:.95rem;outline:none;transition:border .2s}
+  .form-group input:focus,.form-group select:focus{border-color:#00b4a0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}}
+.steps{display:flex;align-items:center;justify-content:center;margin-bottom:28px;flex-wrap:wrap;gap:4px}
+.step{display:flex;align-items:center;gap:6px}
+.step-num{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;background:#e5e7eb;color:#6b7280}
+.step-label{font-size:.8rem;color:#6b7280;font-weight:600}
+.step.active .step-num{background:#00b4a0;color:#fff}.step.active .step-label{color:#00b4a0}
+.step.done .step-num{background:#059669;color:#fff}.step.done .step-label{color:#059669}
+.step-line{width:32px;height:2px;background:#e5e7eb;margin:0 2px}
+.video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;background:#000;margin-bottom:20px}
+.video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+.quiz-option{display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px solid #e5e7eb;border-radius:8px;cursor:pointer;margin-bottom:8px;transition:all .2s}
+.quiz-option:hover{border-color:#00b4a0;background:#f0f9ff}
+.quiz-option.selected{border-color:#00b4a0;background:#eff6ff}
+.quiz-option.correct{border-color:#059669;background:#f0fdf4;pointer-events:none}
+.quiz-option.wrong{border-color:#dc2626;background:#fef2f2;pointer-events:none}
+.opt-letter{font-weight:700;color:#6b7280;min-width:22px}
+.question-block{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:18px;margin-bottom:16px}
+.question-block h4{font-size:.95rem;font-weight:700;margin-bottom:12px;color:#374151}
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.82rem;font-weight:700}
+.badge-pass{background:#d1fae5;color:#065f46}.badge-fail{background:#fee2e2;color:#991b1b}
+.cert-box{background:linear-gradient(135deg,#f0f9ff,#e0f7fa);border:3px solid #00b4a0;border-radius:16px;padding:36px;text-align:center;max-width:520px;margin:0 auto}
+.cert-title{font-size:1.5rem;font-weight:800;color:#00b4a0;margin-bottom:4px}
+.cert-org{font-size:.88rem;color:#6b7280;margin-bottom:14px}
+  .cert-name{font-size:1.4rem;font-weight:800;color:#1a202c;border-bottom:2px solid #00b4a0;padding-bottom:8px;margin-bottom:10px}
+.cert-detail{font-size:.9rem;color:#374151;margin-bottom:4px}
+.cert-score{font-size:1.05rem;font-weight:700;color:#00b4a0;margin-top:10px}
+.spinner{display:inline-block;width:18px;height:18px;border:3px solid #e5e7eb;border-top-color:#00b4a0;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+  #loading-screen{text-align:center;padding:80px 20px}
+  #loading-screen .big-spinner{width:48px;height:48px;border:5px solid #e5e7eb;border-top-color:#00b4a0;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+  </style>
+  </head>
+  <body>
+  <div class="header">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" height="40" style="display:block"><rect x="0" y="2" width="22" height="22" fill="#00b4a0"/><polygon points="26,24 48,24 37,2" fill="#F5C518"/><circle cx="11" cy="39" r="11" fill="#F5C518"/><path d="M 37,28 A 11,11 0 0,0 37,50 Z" fill="#00b4a0"/><rect x="37" y="28" width="11" height="22" fill="#00b4a0"/><text x="56" y="26" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">HASC</text><text x="56" y="50" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">CENTER</text></svg>
+  <span style="margin-left:16px;font-size:1rem;font-weight:700;color:#374151">PON Training</span>
+  </div>
+
+  <div class="container">
+
+<!-- Loading -->
+  <div id="loading-screen">
+<div class="big-spinner"></div>
+<p style="color:#6b7280;font-size:.95rem">Loading your training session...</p>
+  </div>
+
+  <!-- Error -->
+  <div id="error-screen" style="display:none">
+<div class="card">
+<div class="alert alert-error" id="error-msg">Session not found or has already been completed.</div>
+</div>
+</div>
+
+  <!-- Step 1: DSP Info -->
+<div id="step-info" style="display:none">
+  <div class="steps">
+<div class="step active" id="s1"><div class="step-num">1</div><div class="step-label">Your Info</div></div>
+<div class="step-line"></div>
+<div class="step" id="s2"><div class="step-num">2</div><div class="step-label">Watch Video</div></div>
+<div class="step-line"></div>
+<div class="step" id="s3"><div class="step-num">3</div><div class="step-label">Quiz</div></div>
+<div class="step-line"></div>
+<div class="step" id="s4"><div class="step-num">4</div><div class="step-label">Certificate</div></div>
+  </div>
+<div class="card">
+<h2>👋 Welcome — Please Enter Your Information</h2>
+<div id="info-alert"></div>
+<div class="two-col">
+<div class="form-group"><label>Your Full Name *</label><input type="text" id="dsp-name" placeholder="e.g. John Smith"/></div>
+<div class="form-group"><label>Your Role / Title *</label>
+<select id="dsp-title">
+<option value="">-- Select your role --</option>
+<option value="DSP">DSP (Direct Support Professional)</option>
+<option value="Senior DSP">Senior DSP</option>
+<option value="House Manager">House Manager</option>
+<option value="Supervisor">Supervisor</option>
+<option value="Other">Other</option>
+</select>
+</div>
+</div>
+<div class="form-group"><label>Training For</label><input type="text" id="dsp-individual" readonly style="background:#f8fafc;color:#6b7280"/></div>
+<div class="form-group"><label>Residence</label><input type="text" id="dsp-residence" readonly style="background:#f8fafc;color:#6b7280"/></div>
+<button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="goToVideo()">▶ Continue to Training Video</button>
+</div>
+</div>
+
+<!-- Step 2: Video -->
+<div id="step-video" style="display:none">
+<div class="steps">
+<div class="step done" id="v1"><div class="step-num">✓</div><div class="step-label">Your Info</div></div>
+  <div class="step-line"></div>
+<div class="step active" id="v2"><div class="step-num">2</div><div class="step-label">Watch Video</div></div>
+<div class="step-line"></div>
+<div class="step" id="v3"><div class="step-num">3</div><div class="step-label">Quiz</div></div>
+  <div class="step-line"></div>
+<div class="step" id="v4"><div class="step-num">4</div><div class="step-label">Certificate</div></div>
+</div>
+<div class="card">
+<h2>🎥 Watch the Training Video</h2>
+<p style="color:#6b7280;font-size:.88rem;margin-bottom:16px">Please watch the full video before proceeding to the quiz.</p>
+<div class="video-wrap" id="video-container"></div>
+<button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="goToQuiz()">📝 I've Watched the Video — Take Quiz</button>
+</div>
+</div>
+
+<!-- Step 3: Quiz -->
+<div id="step-quiz" style="display:none">
+<div class="steps">
+<div class="step done"><div class="step-num">✓</div><div class="step-label">Your Info</div></div>
+<div class="step-line"></div>
+<div class="step done"><div class="step-num">✓</div><div class="step-label">Watch Video</div></div>
+<div class="step-line"></div>
+<div class="step active"><div class="step-num">3</div><div class="step-label">Quiz</div></div>
+<div class="step-line"></div>
+<div class="step"><div class="step-num">4</div><div class="step-label">Certificate</div></div>
+</div>
+<div class="card">
+<h2>📝 Knowledge Check Quiz</h2>
+<p style="color:#6b7280;font-size:.88rem;margin-bottom:20px">Answer all questions below. You need 4 out of 5 to pass.</p>
+<div id="quiz-alert"></div>
+<div id="quiz-questions"></div>
+<button class="btn btn-success" style="width:100%;margin-top:8px" onclick="submitQuiz()">✅ Submit Quiz</button>
+</div>
+</div>
+
+<!-- Step 4: Certificate -->
+<div id="step-cert" style="display:none">
+<div class="steps">
+<div class="step done"><div class="step-num">✓</div><div class="step-label">Your Info</div></div>
+<div class="step-line"></div>
+<div class="step done"><div class="step-num">✓</div><div class="step-label">Watch Video</div></div>
+<div class="step-line"></div>
+<div class="step done"><div class="step-num">✓</div><div class="step-label">Quiz</div></div>
+<div class="step-line"></div>
+<div class="step active"><div class="step-num">4</div><div class="step-label">Certificate</div></div>
+</div>
+<div class="card" id="cert-card"></div>
+</div>
+
+</div>
+
+<script>
+const SUPA_URL='https://xqcykvgsesavtuautivq.supabase.co';
+const SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY3lrdmdzZXNhdnR1YXV0aXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMzc1ODUsImV4cCI6MjA5MTkxMzU4NX0.A6FkxttGZMGaPxqr1orOWlpoO_zZSeqbp5W3L7s6U5w';
+const sb=supabase.createClient(SUPA_URL,SUPA_ANON);
+
+let sessionData=null;
+let dspName='',dspTitle='';
+
+function getToken(){
+  const p=new URLSearchParams(window.location.search);
+  return p.get('token');
+}
+
+function showStep(id){
+  ['step-info','step-video','step-quiz','step-cert','loading-screen','error-screen'].forEach(s=>{
+    const el=document.getElementById(s);
+    if(el) el.style.display='none';
+});
+  const target=document.getElementById(id);
+  if(target) target.style.display='block';
+}
+
+function getVideoEmbed(url){
+  if(!url) return '';
+  // ScreenPal embed
+  if(url.includes('screenpal.com')||url.includes('screencast-o-matic.com')){
+    const embedUrl=url.replace('/watch/','/embed/').split('?')[0];
+    return `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+}
+  // YouTube
+  const ytMatch=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/);
+  if(ytMatch) return `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe>`;
+  // Vimeo
+  const vmMatch=url.match(/vimeo\.com\/(\d+)/);
+  if(vmMatch) return `<iframe src="https://player.vimeo.com/video/${vmMatch[1]}" allowfullscreen></iframe>`;
+  // Fallback: direct link
+  return `<div style="padding:20px;color:#6b7280;text-align:center"><a href="${url}" target="_blank" style="color:#00b4a0;font-weight:600">▶ Open Training Video</a></div>`;
+}
+
+async function loadSession(){
+  const token=getToken();
+  if(!token){showStep('error-screen');document.getElementById('error-msg').textContent='No training token found. Please use the link provided by your nurse.';return;}
+  const{data,error}=await sb.from('training_sessions').select('*').eq('session_token',token).single();
+  if(error||!data){showStep('error-screen');document.getElementById('error-msg').textContent='Session not found. Please contact your nurse for a new link.';return;}
+  sessionData=data;
+  document.getElementById('dsp-individual').value=data.individual_name||'';
+  document.getElementById('dsp-residence').value=data.residence||'';
+  const vc=document.getElementById('video-container');
+  vc.innerHTML=getVideoEmbed(data.video_url);
+  showStep('step-info');
+}
+
+function goToVideo(){
+  dspName=document.getElementById('dsp-name').value.trim();
+  dspTitle=document.getElementById('dsp-title').value;
+  const alert=document.getElementById('info-alert');
+  if(!dspName||!dspTitle){alert.innerHTML='<div class="alert alert-error">Please enter your name and select your role.</div>';return;}
+  alert.innerHTML='';
+  showStep('step-video');
+}
+
+function goToQuiz(){
+  const qs=sessionData.questions||[];
+  const container=document.getElementById('quiz-questions');
+  container.innerHTML='';
+  qs.forEach((q,i)=>{
+    const opts=['A','B','C','D'];
+    const optLabels=[q.optionA,q.optionB,q.optionC,q.optionD];
+    const block=document.createElement('div');
+    block.className='question-block';
+    block.innerHTML=`<h4>Question ${i+1}: ${q.question}</h4>`+
+      opts.map((l,j)=>`<div class="quiz-option" data-q="${i}" data-opt="${l}" onclick="selectOpt(this,${i},'${l}')"><span class="opt-letter">${l}.</span><span>${optLabels[j]||''}</span></div>`).join('');
+    container.appendChild(block);
+});
+  showStep('step-quiz');
+}
+
+function selectOpt(el,qIdx,opt){
+  document.querySelectorAll(`.quiz-option[data-q="${qIdx}"]`).forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function submitQuiz(){
+  const qs=sessionData.questions||[];
+  const alert=document.getElementById('quiz-alert');
+  let score=0;
+  let allAnswered=true;
+  const results=[];
+  for(let i=0;i<qs.length;i++){
+    const sel=document.querySelector(`.quiz-option[data-q="${i}"].selected`);
+    if(!sel){allAnswered=false;break;}
+    const chosen=sel.dataset.opt;
+    const correct=qs[i].correctOption;
+    const isCorrect=chosen===correct;
+    if(isCorrect) score++;
+    results.push({chosen,correct,isCorrect});
+}
+  if(!allAnswered){alert.innerHTML='<div class="alert alert-error">Please answer all questions before submitting.</div>';return;}
+  alert.innerHTML='';
+
+      // Show correct/wrong highlights
+  for(let i=0;i<qs.length;i++){
+    const r=results[i];
+    document.querySelectorAll(`.quiz-option[data-q="${i}"]`).forEach(o=>{
+      if(o.dataset.opt===r.correct) o.classList.add('correct');
+      else if(o.dataset.opt===r.chosen&&!r.isCorrect) o.classList.add('wrong');
+      o.style.pointerEvents='none';
+});
+  }
+
+  const passed=score>=4;
+  const now=new Date().toISOString();
+
+  // Save certificate to Supabase
+  const{error}=await sb.from('certificates').insert({
+    nurse_email:sessionData.nurse_email,
+    residence:sessionData.residence,
+    individual_name:sessionData.individual_name,
+    dsp_name:dspName,
+    dsp_title:dspTitle,
+    score:score,
+    passed:passed,
+    completed_at:now,
+    session_token:sessionData.session_token
+});
+
+  if(error){
+    alert.innerHTML=`<div class="alert alert-error">Error saving certificate: ${error.message}</div>`;
+    return;
+}
+
+  // Show certificate
+  const certCard=document.getElementById('cert-card');
+  const dateStr=new Date(now).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  certCard.innerHTML=`
+    <div style="text-align:center;margin-bottom:20px">
+      <span class="badge ${passed?'badge-pass':'badge-fail'}" style="font-size:1rem;padding:8px 20px">${passed?'🎉 PASSED':'❌ FAILED'} — ${score}/5 Correct</span>
+    </div>
+    ${passed?'<div class="alert alert-success" style="margin-bottom:20px;text-align:center">Congratulations! You have successfully completed the PON training.</div>':
+    '<div class="alert alert-error" style="margin-bottom:20px;text-align:center">You did not pass this time. Please ask your nurse to create a new training session to retry.</div>'}
+    <div class="cert-box">
+      <div style="font-size:2.5rem;margin-bottom:8px">🏆</div>
+      <div class="cert-title">Certificate of Completion</div>
+      <div class="cert-org">HASC Center — PON Training Program</div>
+      <p style="margin-bottom:8px;color:#374151;font-size:.9rem">This certifies that</p>
+      <div class="cert-name">${dspName}</div>
+      <div class="cert-detail">Role: <strong>${dspTitle}</strong></div>
+      <div class="cert-detail">Residence: <strong>${sessionData.residence||'—'}</strong></div>
+      <div class="cert-detail">Individual: <strong>${sessionData.individual_name||'—'}</strong></div>
+      <div class="cert-score">Score: ${score}/5 (${Math.round((score/5)*100)}%)</div>
+      <div class="cert-detail" style="margin-top:8px;color:#9ca3af;font-size:.8rem">Completed: ${dateStr}</div>
+      <div class="badge ${passed?'badge-pass':'badge-fail'}" style="margin-top:12px">${passed?'✅ PASSED':'❌ FAILED'}</div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:20px" onclick="window.print()">🖨️ Print Certificate</button>
+  `;
+  showStep('step-cert');
+}
+
+document.addEventListener('DOMContentLoaded',loadSession);
+</script>
+</body>
+</html>
