@@ -1,6 +1,6 @@
-<!DOCTYPE html>
+!DOCTYPE html>
   <html lang="en">
-  <head>
+  head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HASC Center - DSP Training</title>
@@ -192,7 +192,7 @@ function getVideoEmbed(url){
   if(!url) return '';
   // ScreenPal embed
   if(url.includes('screenpal.com')||url.includes('screencast-o-matic.com')){
-    const embedUrl=url.replace('/watch/','/embed/').split('?')[0];
+    const vid=url.split('/watch/')[1]||url.split('/player/')[1];const embedUrl='https://go.screenpal.com/player/'+vid+'?ff=1&ahc=1&dcc=1&tl=1&bg=transparent&embed=1';
     return `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
 }
   // YouTube
