@@ -264,7 +264,6 @@ async function submitQuiz(){
     results.push({chosen,correct,isCorrect});
 }
   if(!allAnswered){alert.innerHTML='<div class="alert alert-error">Please answer all questions before submitting.</div>';return;}
-  alert.innerHTML='';
 
       // Show correct/wrong highlights
   for(let i=0;i<qs.length;i++){
@@ -285,11 +284,11 @@ async function submitQuiz(){
     residence:sessionData.residence,
     individual_name:sessionData.individual_name,
     dsp_name:dspName,
-    dsp_title:dspTitle,
+    
     score:score,
     passed:passed,
     completed_at:now,
-    session_token:sessionData.session_token
+    session_id:sessionData.id
 });
 
   if(error){
