@@ -9,10 +9,10 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;min-height:100vh}h
 .header{background:#fff;border-bottom:3px solid #00b4a0;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.hasc-logo-img{height:44px;width:auto;display:block;object-fit:contain}
+.hasc-logo-img{height:44px;width:auto;display:block;object-fit:conhtain}
 .header-left{display:flex;align-items:center;gap:12px}.header-right{display:flex;align-items:center;gap:10px}
 .admin-nav{background:#0d9488;padding:8px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.admin-nav span{color:#ccfbf1;font-size:.82rem;font-weight:600;marhgin-right:4px}
+.admin-nav span{color:#ccfbf1;font-size:.82rem;font-weight:600;marhhgin-right:4px}
 .admin-nav-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 14px;border-radius:6px;font-size:.82rem;cursor:pointer}
 .admin-nav-btn:hover{background:rgba(255,255,255,.28)}.admin-nav-btn.active{background:#fff;color:#0d9488;font-weight:700}
 .container{max-width:960px;margin:32px auto;padding:0 16px}
@@ -310,7 +310,7 @@ tr:hover td{background:#f8fafc}
           <span style="font-size:.7rem">▼</span>
         </button>
         <div id="admin-switcher-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);min-width:180px;z-index:1000">
-          <button onclick="switchPortal('nurse')" style="display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151;border-bottom:1px solid #f3f4f6">
+          <button onclick="switchPortal('nurse')" style="display:block;width:100%;text-alhign:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151;border-bottom:1px solid #f3f4f6">
             👩‍⚕️ Nurse Portal
           </button>
           <button onclick="switchPortal('admin')" style="display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151">
@@ -430,7 +430,7 @@ tr:hover td{background:#f8fafc}
   <div id="cert-content"></div>
 </div></div>
 <script>
-const SUPA_URL='https://xqcykvgsesavtuautivq.supabase.co';
+const SUPA_URL='https://xqcykvgesavtuautivq.supabase.co';
 const SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY3lrdmdlc2F2dHVhdXRpdnEiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczNTAzODAxMiwiZXhwIjoyMDUwNjE0MDEyfQ.u0pZRx1Qr4PZWQY0-1sZSzTyQEF-Pu0mjzvk79VNxc0';
 const sb=supabase.createClient(SUPA_URL,SUPA_ANON);
 const ADMIN_HARDCODE={username:'mshilcrat',email:'mshilcrat@hasccenter.org',pin:'1147'};
