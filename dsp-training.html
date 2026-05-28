@@ -126,6 +126,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;mi
 <h2>🎥 Watch the Training Video</h2>
 <p style="color:#6b7280;font-size:.88rem;margin-bottom:16px">Please watch the full video before proceeding to the quiz.</p>
 <div class="video-wrap" id="video-container"></div>
+<div id="doc-container" style="margin-top:16px"></div>
 <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="goToQuestions()">💬 Continue to Questions →</button>
 </div>
 </div>
@@ -245,6 +246,7 @@ async function loadSession(){
   document.getElementById('dsp-residence').value=data.residence||'';
   const vc=document.getElementById('video-container');
   vc.innerHTML=getVideoEmbed(data.video_url);
+const dc=document.getElementById('doc-container');if(data.document_url){dc.innerHTML='<div style="background:#f0f9ff;border:1px solid #00b4a0;border-radius:10px;padding:16px;text-align:center"><div style="font-size:1.6rem">📄</div><p style="color:#374151;font-weight:600;margin:6px 0 12px">Training Document</p><a href="'+data.document_url+'" target="_blank" rel="noopener" class="btn btn-primary">📄 View Training Document</a></div>';}else{dc.innerHTML='';}if(!data.video_url){const vw=document.getElementById('video-container');if(vw)vw.style.display='none';}
   showStep('step-info');
 }
 
