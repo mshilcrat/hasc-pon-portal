@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -202,11 +203,11 @@ tr:hover td{background:#f8fafc}
   <div class="header"><div class="header-left" style="margin-left:72px;margin-top:36px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" height="44" style="display:block"><rect x="0" y="2" width="22" height="22" fill="#00b4a0"/><polygon points="26,24 48,24 37,2" fill="#F5C518"/><circle cx="11" cy="39" r="11" fill="#F5C518"/><path d="M 37,28 A 11,11 0 0,0 37,50 Z" fill="#00b4a0"/><rect x="37" y="28" width="11" height="22" fill="#00b4a0"/><text x="56" y="26" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">HASC</text><text x="56" y="50" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">CENTER</text></svg></div></div>
   <div class="container" style="max-width:700px;margin-top:60px">
     <div style="text-align:center;margin-bottom:32px">
-      <div style="font-size:2rem;font-weight:800;color:#1a202c;margin-bottom:8px">PON Training Portal</div>
+      <div style="font-size:2rem;font-weight:800;color:#1a202c;margin-bottom:8px"> Training Portal</div>
       <p style="color:#6b7280">Select your portal below. Nurses manage training sessions; Admin views all data.</p>
     </div>
     <div class="portal-grid">
-      <div class="portal-card nurse" onclick="showPortal('nurse')"><div class="icon">👩‍⚕️</div><h3>PON Training Portal</h3><p>Set up training sessions, generate DSP links, view completion certificates.</p></div>
+      <div class="portal-card nurse" onclick="showPortal('nurse')"><div class="icon">👩‍⚕️</div><h3>Training Portal</h3><p>Set up training sessions, generate DSP links, view completion certificates.</p></div>
       <div class="portal-card admin" onclick="showPortal('admin')"><div class="icon">🔑</div><h3>Staff Access Manager</h3><p>Admin only — view all training data, manage staff and admin accounts.</p></div>
     </div>
   </div>
@@ -223,7 +224,7 @@ tr:hover td{background:#f8fafc}
         </button>
         <div id="nurse-switcher-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);min-width:180px;z-index:1000">
           <button onclick="switchPortal('nurse')" style="display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151;border-bottom:1px solid #f3f4f6">
-            👩‍⚕️ Nurse Portal
+            👩‍⚕️ Training Portal
           </button>
           <button onclick="switchPortal('admin')" style="display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151">
             🔑 Admin Portal
@@ -255,7 +256,7 @@ tr:hover td{background:#f8fafc}
       <div class="tabs">
         <button class="tab-btn active" id="tab-setup" onclick="switchNurseTab('setup')">📋 Setup Training</button>
         <button class="tab-btn" id="tab-dash" onclick="switchNurseTab('dash')">📊 Dashboard</button>
-        <button class="tab-btn" id="tab-questions" onclick="switchNurseTab('questions')">💬 DSP Questions <span id="q-badge" style="background:#ef4444;color:white;border-radius:99px;font-size:0.72rem;font-weight:700;padding:1px 7px;margin-left:6px;display:none;">0</span></button>
+        <button class="tab-btn" id="tab-questions" onclick="switchNurseTab('questions')">💬 Questions <span id="q-badge" style="background:#ef4444;color:white;border-radius:99px;font-size:0.72rem;font-weight:700;padding:1px 7px;margin-left:6px;display:none;">0</span></button>
       </div>
       <div id="nurse-setup-tab">
         <div class="card"><h2>📋 Create Training Session</h2>
@@ -301,7 +302,7 @@ tr:hover td{background:#f8fafc}
     </div>
   </div>
 </div>
-    <div id="nurse-questions-tab" style="display:none"><div class="card"><h2 style="display:flex;align-items:center;justify-content:space-between;"><span>💬 DSP Questions Inbox</span><span id="q-inbox-count" style="font-size:0.85rem;font-weight:400;color:#6b7280;"></span></h2><p style="color:#6b7280;margin-bottom:20px;font-size:0.93rem;">DSPs who had questions after watching their training video. Call them back and click Mark Resolved when done.</p><div id="q-inbox-list"><div style="text-align:center;padding:40px;color:#9ca3af;"><div style="font-size:3rem;">✅</div><p style="font-weight:600;margin-top:8px;">No pending questions</p></div></div></div></div>
+    <div id="nurse-questions-tab" style="display:none"><div class="card"><h2 style="display:flex;align-items:center;justify-content:space-between;"><span>💬 Questions Inbox</span><span id="q-inbox-count" style="font-size:0.85rem;font-weight:400;color:#6b7280;"></span></h2><p style="color:#6b7280;margin-bottom:20px;font-size:0.93rem;">DSPs who had questions after watching their training video. Call them back and click Mark Resolved when done.</p><div id="q-inbox-list"><div style="text-align:center;padding:40px;color:#9ca3af;"><div style="font-size:3rem;">✅</div><p style="font-weight:600;margin-top:8px;">No pending questions</p></div></div></div></div>
 <div id="admin-portal" style="display:none">
   <div class="header">
     <div class="header-left" style="margin-left:72px;margin-top:36px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" height="44" style="display:block"><rect x="0" y="2" width="22" height="22" fill="#00b4a0"/><polygon points="26,24 48,24 37,2" fill="#F5C518"/><circle cx="11" cy="39" r="11" fill="#F5C518"/><path d="M 37,28 A 11,11 0 0,0 37,50 Z" fill="#00b4a0"/><rect x="37" y="28" width="11" height="22" fill="#00b4a0"/><text x="56" y="26" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">HASC</text><text x="56" y="50" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">CENTER</text></svg></div>
@@ -314,7 +315,7 @@ tr:hover td{background:#f8fafc}
         </button>
         <div id="admin-switcher-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);min-width:180px;z-index:1000">
           <button onclick="switchPortal('nurse')" style="display:block;width:100%;text-alhign:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151;border-bottom:1px solid #f3f4f6">
-            👩‍⚕️ Nurse Portal
+            🔑 Training Portal
           </button>
           <button onclick="switchPortal('admin')" style="display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151">
             🔑 Admin Portal
@@ -373,8 +374,8 @@ tr:hover td{background:#f8fafc}
       </div>
       <div id="admin-staff-tab" style="display:none">
         <div class="card">
-          <h2>👥 Manage Nurse Staff</h2>
-          <div class="info-banner">✨ <strong>Add a nurse:</strong> Fill the form below and click Add. The nurse will receive email + PIN credentials for the PON Training Portal.</div>
+          <h2>👥 Manage Staff</h2>
+          <div class="info-banner">✨ <strong>Add a nurse:</strong> Fill the form below and click Add. The staff will receive email + PIN credentials for the Training Portal.</div>
           <div class="form-section">
             <h3>➕ Add New Nurse</h3>
             <div id="add-nurse-alert"></div>
