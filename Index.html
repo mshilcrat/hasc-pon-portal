@@ -643,7 +643,7 @@ window.updateAdminCounts = function() {
   var T='#1a93a8',D='#0f7e92',A='#e08a1e';
   function tb(){return document.getElementById('cert-table');}
   function ini(n){return (n||'?').split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();}
-  function rw(){var t=tb();if(!t)return[];return [].slice.call(t.querySelectorAll('tbody tr')).map(function(tr){var c=tr.children,s=(c[7]?c[7].textContent:'');return{date:c[1]?c[1].textContent.trim():'',res:c[2]?c[2].textContent.trim():'',test:c[3]?c[3].textContent.trim():'',dsp:c[4]?c[4].textContent.trim():'',score:c[6]?c[6].textContent.trim():'',fail:/fail/i.test(s)};});}
+          function rw(){var t=tb();if(!t)return[];return [].slice.call(t.querySelectorAll('tbody tr')).map(function(tr){var c=tr.children,s=(c[7]?c[7].textContent:'');return{date:c[1]?c[1].textContent.trim():'',res:c[2]?c[2].textContent.trim():'',test:c[3]?c[3].textContent.trim():'',dsp:c[4]?c[4].textContent.trim():'',score:c[6]?c[6].textContent.trim():'',fail:/fail/i.test(s),id:(c[0]&&c[0].querySelector('input')?c[0].querySelector('input').getAttribute('data-id'):'')};})}
   function pn(){var p=document.getElementById('cert-facelift');if(!p){p=document.createElement('div');p.id='cert-facelift';var t=tb();if(t&&t.parentElement)t.parentElement.insertBefore(p,t);}return p;}
   function rn(sel,q){
     var t=tb();if(!t)return;t.style.display='none';
@@ -663,10 +663,8 @@ window.updateAdminCounts = function() {
           +'<div style="width:36px;height:36px;border-radius:50%;background:'+(r.fail?A:T)+';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">'+ini(r.dsp)+'</div>'
           +'<div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1f2a37;">'+r.dsp+'</div><div style="font-size:12px;color:#8893a3;">'+r.date+'</div></div>'
           +b
-         +'<button style="background:#fff;border:1px solid #4dade2;color:#1f2a37;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;" onclick="viewCert(\''+r.id+'\',false)">666
-          
-          +'<button style="background:#fff;border:1px solid #f0c9c9;color:#c0362c;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Delete</button></div>';
-      }).join('');
+          +'<button style="background:#fff;border:1px solid #d4dae2;color:#1f2a37;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;" onclick="viewCert(\''+r.id+'\',false)">View</button>'          
+          +'<button style="background:#fff;border:1px solid #f0c9c9;color:#c0362c;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;" onclick="deleteCert(\''+r.id+'\')">Delete</button></div>';      }).join('');
       return '<div style="background:#fff;border:1px solid #e6eaf0;border-radius:14px;margin-bottom:14px;overflow:hidden;">'
         +'<div style="padding:14px 16px;background:#f7fafb;'+(oC?'border-bottom:1px solid #eef1f5;':'')+'">'
         +'<div style="display:flex;align-items:center;"><span style="font-size:16px;font-weight:700;color:#1f2a37;">'+ti+'</span>'
