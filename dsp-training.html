@@ -384,24 +384,28 @@ document.addEventListener('DOMContentLoaded',loadSession);
       var dc=document.getElementById("doc-container"); if(!dc) return;
       var ifr=dc.querySelector("iframe"); if(!ifr) return;
       if(document.documentElement.classList.contains("hasc-framed")){
-        var scale=Math.min(1, dc.clientWidth/DOC_RENDER_W);
+        var w=dc.clientWidth;
+        if(!w){ requestAnimationFrame(fitDoc); return; }  /* wait for layout before scaling */
+        var scale=Math.min(1, w/DOC_RENDER_W);
         ifr.style.width=DOC_RENDER_W+"px";
         ifr.style.height=Math.round(DOC_VIEW_H/scale)+"px";
         ifr.style.transform="scale("+scale+")";
         dc.style.height=DOC_VIEW_H+"px";
+        if(!ifr.__hascLoadHooked){ ifr.__hascLoadHooked=1; ifr.addEventListener("load",fitDoc); }
       } else {
         ifr.style.width=""; ifr.style.height=""; ifr.style.transform=""; dc.style.height="";
       }
     }
+    function scheduleFit(){ fitDoc(); requestAnimationFrame(fitDoc); setTimeout(fitDoc,300); setTimeout(fitDoc,1200); }
     function detectAuto(){return (window.matchMedia&&window.matchMedia("(max-width:768px)").matches)?"phone":"pc";}
-    function apply(mode){var eff=mode==="auto"?detectAuto():mode;document.documentElement.classList.toggle("hasc-framed",eff==="phone");btn.textContent=labels[mode];fitDoc();}
+    function apply(mode){var eff=mode==="auto"?detectAuto():mode;document.documentElement.classList.toggle("hasc-framed",eff==="phone");btn.textContent=labels[mode];scheduleFit();}
     function getMode(){var m=localStorage.getItem(KEY);return modes.indexOf(m)>=0?m:"pc";}
     function setMode(m){localStorage.setItem(KEY,m);apply(m);}
     btn.addEventListener("click",function(){var c=getMode();setMode(modes[(modes.indexOf(c)+1)%modes.length]);});
     if(window.matchMedia){try{window.matchMedia("(max-width:768px)").addEventListener("change",function(){if(getMode()==="auto")apply("auto");});}catch(e){}}
     window.addEventListener("resize",fitDoc);
     /* The document iframe is created when the user reaches the video step; re-fit when it appears. */
-    try{var mo=new MutationObserver(function(){fitDoc();}); var dcEl=document.getElementById("doc-container"); if(dcEl){mo.observe(dcEl,{childList:true,subtree:true});}}catch(e){}
+    try{var mo=new MutationObserver(function(){scheduleFit();}); var dcEl=document.getElementById("doc-container"); if(dcEl){mo.observe(dcEl,{childList:true,subtree:true});}}catch(e){}
     apply(getMode());
   })();
   </script>
