@@ -368,6 +368,9 @@ document.addEventListener('DOMContentLoaded',loadSession);
     html.hasc-framed body{background:radial-gradient(120% 80% at 50% 0%, #15545d 0%, #0c2b30 70%) !important;min-height:100vh;}
     html.hasc-framed body > *:not(#hasc-view-toggle-btn){max-width:440px !important;margin-left:auto !important;margin-right:auto !important;}
     #hasc-view-toggle-btn{position:fixed;bottom:14px;right:14px;z-index:2147483600;display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;border:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.96);box-shadow:0 6px 18px rgba(0,0,0,.22);font-size:12.5px;font-weight:600;color:#1a202c;cursor:pointer;font-family:inherit;}
+    /* Fit the embedded training document inside the narrow phone frame */
+    html.hasc-framed #doc-container{overflow:hidden;border-radius:10px;}
+    html.hasc-framed #doc-container iframe{transform-origin:top left;}
   </style>
   <button id="hasc-view-toggle-btn" type="button" aria-label="Switch view"></button>
   <script>
@@ -376,12 +379,29 @@ document.addEventListener('DOMContentLoaded',loadSession);
     var modes=["pc","auto","phone"];
     var labels={pc:"\uD83D\uDCBB PC",auto:"\uD83D\uDD32 Auto",phone:"\uD83D\uDCF1 Phone"};
     var btn=document.getElementById("hasc-view-toggle-btn");
+    var DOC_RENDER_W=760, DOC_VIEW_H=560;
+    function fitDoc(){
+      var dc=document.getElementById("doc-container"); if(!dc) return;
+      var ifr=dc.querySelector("iframe"); if(!ifr) return;
+      if(document.documentElement.classList.contains("hasc-framed")){
+        var scale=Math.min(1, dc.clientWidth/DOC_RENDER_W);
+        ifr.style.width=DOC_RENDER_W+"px";
+        ifr.style.height=Math.round(DOC_VIEW_H/scale)+"px";
+        ifr.style.transform="scale("+scale+")";
+        dc.style.height=DOC_VIEW_H+"px";
+      } else {
+        ifr.style.width=""; ifr.style.height=""; ifr.style.transform=""; dc.style.height="";
+      }
+    }
     function detectAuto(){return (window.matchMedia&&window.matchMedia("(max-width:768px)").matches)?"phone":"pc";}
-    function apply(mode){var eff=mode==="auto"?detectAuto():mode;document.documentElement.classList.toggle("hasc-framed",eff==="phone");btn.textContent=labels[mode];}
+    function apply(mode){var eff=mode==="auto"?detectAuto():mode;document.documentElement.classList.toggle("hasc-framed",eff==="phone");btn.textContent=labels[mode];fitDoc();}
     function getMode(){var m=localStorage.getItem(KEY);return modes.indexOf(m)>=0?m:"pc";}
     function setMode(m){localStorage.setItem(KEY,m);apply(m);}
     btn.addEventListener("click",function(){var c=getMode();setMode(modes[(modes.indexOf(c)+1)%modes.length]);});
     if(window.matchMedia){try{window.matchMedia("(max-width:768px)").addEventListener("change",function(){if(getMode()==="auto")apply("auto");});}catch(e){}}
+    window.addEventListener("resize",fitDoc);
+    /* The document iframe is created when the user reaches the video step; re-fit when it appears. */
+    try{var mo=new MutationObserver(function(){fitDoc();}); var dcEl=document.getElementById("doc-container"); if(dcEl){mo.observe(dcEl,{childList:true,subtree:true});}}catch(e){}
     apply(getMode());
   })();
   </script>
