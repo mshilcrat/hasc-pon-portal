@@ -635,5 +635,55 @@ window.updateAdminCounts = function() {
   async function delAdmin(id,nm){if(!confirm('Delete admin "'+nm+'"?'))return;const{error}=await sb.from('admin_accounts').delete().eq('id',id);if(error){alert('Error: '+error.message);return;}loadAdminList();}
   const _nl=nurseLogin;nurseLogin=async function(){await _nl();setTimeout(async()=>{const m=document.getElementById('nurse-main');if(m&&m.style.display!=='none'){const{data}=await sb.from('dsp_questions').select('id').eq('resolved',false);const bg=document.getElementById('q-badge');if(bg&&data){bg.textContent=data.length;bg.style.display=data.length>0?'inline-block':'none';}}},600);};
 </script>
+  <script>
+(function(){
+  var T='#1a93a8',D='#0f7e92',A='#e08a1e';
+  function tb(){return document.getElementById('cert-table');}
+  function ini(n){return (n||'?').split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();}
+  function rw(){var t=tb();if(!t)return[];return [].slice.call(t.querySelectorAll('tbody tr')).map(function(tr){var c=tr.children,s=(c[7]?c[7].textContent:'');return{date:c[1]?c[1].textContent.trim():'',res:c[2]?c[2].textContent.trim():'',test:c[3]?c[3].textContent.trim():'',dsp:c[4]?c[4].textContent.trim():'',score:c[6]?c[6].textContent.trim():'',fail:/fail/i.test(s)};});}
+  function pn(){var p=document.getElementById('cert-facelift');if(!p){p=document.createElement('div');p.id='cert-facelift';var t=tb();if(t&&t.parentElement)t.parentElement.insertBefore(p,t);}return p;}
+  function rn(sel,q){
+    var t=tb();if(!t)return;t.style.display='none';
+    var p=pn(),rs=rw(),H={};
+    rs.forEach(function(r){H[r.res]=H[r.res]||{};(H[r.res][r.test]=H[r.res][r.test]||[]).push(r);});
+    var nm=Object.keys(H).sort();if(!nm.length)return;sel=sel&&H[sel]?sel:nm[0];
+    var oo=nm.map(function(h){var a=0,k=Object.keys(H[h]);k.forEach(function(x){a+=H[h][x].length;});return '<option '+(h===sel?'selected':'')+'>'+h+' ('+k.length+' tests, '+a+' attempts)</option>';}).join('');
+    var ts=H[sel]||{};
+    var th=Object.keys(ts).map(function(ti,ix){
+      var at=ts[ti].filter(function(r){return !q||(r.dsp+' '+r.test).toLowerCase().indexOf(q.toLowerCase())>=0;});
+      var fl=at.filter(function(r){return r.fail;}).length, oC=ix===0;
+      var rh=at.map(function(r){
+        var b=r.fail
+          ?'<span style="background:#fbe7c9;color:'+A+';padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700;">&#10060; '+r.score+' Fail</span>'
+          :'<span style="background:#d6eef1;color:'+D+';padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700;">&#9989; '+r.score+' Pass</span>';
+        return '<div style="display:flex;align-items:center;gap:12px;padding:10px 16px 10px 24px;border-top:1px solid #eef1f5;'+(r.fail?'background:#fffaf2;':'')+'">'
+          +'<div style="width:36px;height:36px;border-radius:50%;background:'+(r.fail?A:T)+';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">'+ini(r.dsp)+'</div>'
+          +'<div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1f2a37;">'+r.dsp+'</div><div style="font-size:12px;color:#8893a3;">'+r.date+'</div></div>'
+          +b
+          +'<button style="background:#fff;border:1px solid #d4dae2;color:#1f2a37;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">View</button>'
+          +'<button style="background:#fff;border:1px solid #f0c9c9;color:#c0362c;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Delete</button></div>';
+      }).join('');
+      return '<div style="background:#fff;border:1px solid #e6eaf0;border-radius:14px;margin-bottom:14px;overflow:hidden;">'
+        +'<div style="padding:14px 16px;background:#f7fafb;'+(oC?'border-bottom:1px solid #eef1f5;':'')+'">'
+        +'<div style="display:flex;align-items:center;"><span style="font-size:16px;font-weight:700;color:#1f2a37;">'+ti+'</span>'
+        +'<span style="margin-left:10px;background:#eef1f6;color:#555;padding:1px 9px;border-radius:10px;font-size:12px;">'+at.length+' attempts</span>'
+        +(fl?'<span style="margin-left:8px;background:#fbe7c9;color:'+A+';padding:1px 9px;border-radius:10px;font-size:12px;font-weight:700;">'+fl+' retake</span>':'')+'</div>'
+        +'<div style="margin-top:10px;"><span style="font-size:12px;color:#8893a3;">Permanent link saved with this test</span> '
+        +'<button style="background:'+T+';border:none;color:#fff;padding:4px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;">Copy link</button></div></div>'
+        +(oC?rh:'')+'</div>';
+    }).join('');
+    p.innerHTML='<div style="background:#fff;border:1px solid #e6eaf0;border-radius:14px;padding:16px 18px;margin-bottom:18px;">'
+      +'<label style="display:block;font-size:12px;font-weight:700;color:#8893a3;margin-bottom:6px;">SELECT HOME</label>'
+      +'<select id="cf-h" style="width:100%;padding:13px 16px;border:2px solid '+T+';border-radius:10px;font-size:16px;font-weight:600;background:#fff;cursor:pointer;">'+oo+'</select></div>'
+      +'<div style="margin-bottom:18px;"><input id="cf-q" placeholder="Search within this home..." value="'+(q||'')+'" style="width:100%;padding:12px 14px;border:1.5px solid #d4dae2;border-radius:10px;font-size:15px;box-sizing:border-box;"></div>'
+      +'<div style="font-size:13px;font-weight:700;color:#8893a3;margin-bottom:12px;">TESTS IN '+sel+'</div>'
+      +(th||'<div style="color:#8893a3;padding:20px;">No matching records.</div>');
+    var h=document.getElementById('cf-h');if(h)h.onchange=function(e){rn(e.target.value.split(' (')[0],(document.getElementById('cf-q')||{}).value);};
+    var qi=document.getElementById('cf-q');if(qi){qi.oninput=function(e){rn(sel,e.target.value);};}
+  }
+  function bo(){var t=tb();if(t&&t.querySelector('tbody tr'))rn();}
+  setInterval(bo,1000);document.addEventListener('DOMContentLoaded',bo);setTimeout(bo,1500);
+})();
+</script>
 </body>
 </html>
