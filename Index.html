@@ -683,7 +683,7 @@ window.updateAdminCounts = function() {
     var h=document.getElementById('cf-h');if(h)h.onchange=function(e){rn(e.target.value.split(' (')[0],(document.getElementById('cf-q')||{}).value);};
     var qi=document.getElementById('cf-q');if(qi){qi.oninput=function(e){rn(sel,e.target.value);};}
   }
-  function bo(){var t=tb();if(t&&t.querySelector('tbody tr'))rn();}
+    function bo(){var t=tb();if(t&&t.querySelector('tbody tr')){rn();}else if(typeof loadCerts==='function'){loadCerts().then(function(){rn();}).catch(function(){});}}
   setInterval(bo,1000);document.addEventListener('DOMContentLoaded',bo);setTimeout(bo,1500);
 })();
 </script>
