@@ -582,7 +582,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // --- 3. This function will be called by renderACerts after buttons are created ---
 });
+function viewCert(id,isAdmin){const t=document.getElementById(isAdmin?'admin-cert-table':'cert-table');if(!t)return;const r=[...t.querySelectorAll('tbody tr')].find(row=>(row.cells[0].querySelector('input')||{}).getAttribute('data-id')===id);if(!r)return;const vid=r.cells[8]?r.cells[8].getAttribute('data-video'):'';if(vid){const m=document.createElement('div');m.id='video-modal-view';m.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:9999;';m.innerHTML='<div style="background:#fff;border-radius:10px;padding:20px;max-width:600px;width:90%;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;"><h3 style="margin:0;">View Certificate</h3><button onclick="document.getElementById(\'video-modal-view\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;">&times;</button></div><video width="100%" height="400" controls style="border-radius:5px;"><source src="'+vid+'" type="video/mp4"></video></div>';document.body.appendChild(m);}}
 
+function deleteCert(id){if(!confirm('Are you sure you want to delete this certificate?'))return;const t=document.getElementById('cert-table')||document.getElementById('admin-cert-table');if(!t)return;const r=[...t.querySelectorAll('tbody tr')].find(row=>(row.cells[0].querySelector('input')||{}).getAttribute('data-id')===id);if(r)r.remove();}
 // Make setupDeleteButtons global so renderACerts can call it
 window.setupDeleteButtons = function() {
     const deleteButtons = document.querySelectorAll('#admin-cert-table .delete-btn');
