@@ -1134,6 +1134,34 @@ function render(){
     }catch(e){}
   }
   window.tcReloadFoldersLocal = tcReloadFoldersLocal;
+
+  // === FIX: persist item->folder moves to DB (certificates.archive_file) ===
+  function _certIdLocal(itemId){ var s=String(itemId); return (s.charAt(0)==='c' && s.length>30) ? s.slice(1) : s; }
+  async function dbSaveItemFolder(itemId, folderId){
+    try{
+      await sb.from('certificates').update({ archive_file: (folderId||null), is_archived: !!folderId }).eq('id', _certIdLocal(itemId));
+    }catch(e){}
+  }
+  window.dbSaveItemFolder = dbSaveItemFolder;
+
+  async function tcReloadItemFoldersLocal(){
+    try{
+      const res = await sb.from('certificates').select('id,archive_file,is_archived');
+      if(res && !res.error && Array.isArray(res.data)){
+        res.data.forEach(function(r){
+          if(r.archive_file){ itemFolder['c'+r.id] = r.archive_file; itemFolder[r.id] = r.archive_file; }
+        });
+        try{ render(); }catch(e){}
+      }
+    }catch(e){}
+  }
+  window.tcReloadItemFoldersLocal = tcReloadItemFoldersLocal;
+  (function(){
+    function _go2(){ try{ tcReloadItemFoldersLocal(); }catch(e){} }
+    if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', function(){ setTimeout(_go2, 800); }); }
+    else { setTimeout(_go2, 800); }
+  })();
+
   (function(){
     function _go(){ try{ tcReloadFoldersLocal(); }catch(e){} }
     if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', function(){ setTimeout(_go, 600); }); }
@@ -1283,8 +1311,8 @@ document.addEventListener('click',e=>{if(!e.target.closest('.tc-popover')&&!e.ta
 
 window.tcMoveToFolder=function(itemId,folderId){
   closePopover();
-  if(folderId){const f=folders.find(x=>x.id===folderId);toast(`File moved to ${f.name}`);flashAndRemove(itemId,()=>{itemFolder[itemId]=folderId;render();});}
-  else{delete itemFolder[itemId];toast('File removed from folder');render();}
+  if(folderId){const f=folders.find(x=>x.id===folderId);toast(`File moved to ${f.name}`);flashAndRemove(itemId,()=>{itemFolder[itemId] = folderId; try{ dbSaveItemFolder(itemId, folderId); }catch(e){}render();});}
+  else{delete itemFolder[itemId]; try{ dbSaveItemFolder(itemId, null); }catch(e){}toast('File removed from folder');render();}
 };
 window.tcNewFolderInline=function(itemId){
   closePopover();
