@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HASC Center Training Portal</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- ====================================================================== -->
+<!-- ===== STYLES ========================================================= -->
+<!-- ====================================================================== -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;min-height:100vh}
+.header{background:#fff;border-bottom:3px solid #00b4a0;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.hasc-logo-img{height:44px;width:auto;display:block;object-fit:contain}
+.header-left{display:flex;align-items:center;gap:12px}.header-right{display:flex;align-items:center;gap:10px}
+.admin-nav{background:#0d9488;padding:8px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.admin-nav span{color:#ccfbf1;font-size:.82rem;font-weight:600;margin-right:4px}
+.admin-nav-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 14px;border-radius:6px;font-size:.82rem;cursor:pointer}
+.admin-nav-btn:hover{background:rgba(255,255,255,.28)}.admin-nav-btn.active{background:#fff;color:#0d9488;font-weight:700}
+.container{max-width:960px;margin:32px auto;padding:0 16px}
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:32px;margin-bottom:24px}
+.card h2{font-size:1.2rem;font-weight:700;margin-bottom:20px;color:#1a202c;display:flex;align-items:center;gap:8px}
+.portal-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:640px){.portal-grid{grid-template-columns:1fr}}
+.portal-card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:28px;cursor:pointer;border:2px solid transparent;transition:all .2s;text-align:center}
+.portal-card:hover{border-color:#00b4a0;transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,174,239,.15)}
+.portal-card .icon{width:64px;height:64px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px}
+.portal-card.nurse .icon{background:#e0f7fa}.portal-card.admin .icon{background:#fff8e1}
+.portal-card h3{font-size:1.1rem;font-weight:700;margin-bottom:6px}.portal-card p{font-size:.88rem;color:#6b7280;line-height:1.5}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;font-weight:600;font-size:.92rem;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:#00b4a0;color:#fff}.btn-primary:hover{background:#009688}
+.btn-success{background:#059669;color:#fff}.btn-success:hover{background:#047857}
+.btn-secondary{background:#f3f4f6;color:#374151;border:1px solid #d1d5db}.btn-secondary:hover{background:#e5e7eb}
+.btn-warning{background:#d97706;color:#fff}.btn-warning:hover{background:#b45309}
+.btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-sm{padding:5px 12px;font-size:.8rem}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-weight:600;font-size:.88rem;margin-bottom:6px;color:#374151}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:.95rem;outline:none;transition:border .2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#00b4a0}
+.form-group textarea{min-height:80px;resize:vertical}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.two-col{grid-template-columns:1fr}}
+.pin-group{display:flex;gap:10px;justify-content:center;margin:12px 0}
+.pin-digit,.adm-pin,.new-pin,.admin-new-pin{width:52px;height:52px;text-align:center;font-size:1.3rem;font-weight:700;border:2px solid #d1d5db;border-radius:10px;outline:none}
+.pin-digit:focus,.adm-pin:focus,.new-pin:focus,.admin-new-pin:focus{border-color:#00b4a0}
+.tabs{display:flex;gap:4px;border-bottom:2px solid #e5e7eb;margin-bottom:24px}
+.tab-btn{padding:10px 20px;border:none;background:none;font-size:.92rem;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0}
+.tab-btn.active{color:#00b4a0;border-bottom-color:#00b4a0;background:#f0f9ff}
+.alert{padding:12px 16px;border-radius:8px;font-size:.9rem;margin-bottom:16px}
+.alert-error{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626}
+.alert-success{background:#f0fdf4;border:1px solid #86efac;color:#15803d}
+.alert-info{background:#eff6ff;border:1px solid #93c5fd;color:#1d4ed8}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+@media(max-width:640px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);padding:20px;text-align:center}
+.stat-card .num{font-size:2rem;font-weight:800;color:#00b4a0}.stat-card .lbl{font-size:.82rem;color:#6b7280;margin-top:4px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{background:#f8fafc;padding:10px 12px;text-align:left;font-weight:700;color:#374151;border-bottom:2px solid #e5e7eb}
+td{padding:10px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:hover td{background:#f8fafc}
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:.8rem;font-weight:700}
+.badge-pass{background:#d1fae5;color:#065f46}.badge-fail{background:#fee2e2;color:#991b1b}
+.badge-active{background:#dbeafe;color:#1e40af}.badge-inactive{background:#f3f4f6;color:#6b7280}
+.filter-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px;align-items:end}
+.filter-bar input,.filter-bar select{padding:8px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:.87rem;width:100%}
+.pending-item{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}
+.pending-item .info .dsp-name{font-weight:700;margin-bottom:4px}
+.pending-item .info .phone,.pending-item .info .question,.pending-item .info .meta{font-size:.87rem;margin-bottom:4px;color:#6b7280}
+.steps{display:flex;align-items:center;justify-content:center;margin-bottom:32px}
+.step{display:flex;align-items:center;gap:8px}
+.step-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;background:#e5e7eb;color:#6b7280}
+.step-label{font-size:.82rem;color:#6b7280;font-weight:600}
+.step.active .step-num{background:#00b4a0;color:#fff}.step.active .step-label{color:#00b4a0}
+.step.done .step-num{background:#059669;color:#fff}.step.done .step-label{color:#059669}
+.step-line{width:40px;height:2px;background:#e5e7eb;margin:0 4px}
+.quiz-option{display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px solid #e5e7eb;border-radius:8px;cursor:pointer;margin-bottom:8px;transition:all .2s}
+.quiz-option:hover{border-color:#00b4a0;background:#f0f9ff}.quiz-option.selected{border-color:#00b4a0;background:#eff6ff}
+.quiz-option.correct{border-color:#059669;background:#f0fdf4}.quiz-option.wrong{border-color:#dc2626;background:#fef2f2}
+.opt-letter{font-weight:700;color:#6b7280;min-width:20px}
+.question-builder{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:18px;margin-bottom:16px}
+.question-builder h4{font-size:.95rem;font-weight:700;margin-bottom:12px;color:#374151}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.options-grid{grid-template-columns:1fr}}
+.option-row{display:flex;align-items:center;gap:8px}
+.option-row input[type=text]{flex:1;padding:8px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:.87rem}
+.option-row input[type=radio]{accent-color:#00b4a0;width:16px;height:16px;cursor:pointer}
+.correct-label{font-size:.78rem;color:#059669;font-weight:600;white-space:nowrap}
+.cert-box{background:linear-gradient(135deg,#f0f9ff,#e0f7fa);border:3px solid #00b4a0;border-radius:16px;padding:36px;text-align:center;max-width:520px;margin:0 auto}
+.cert-title{font-size:1.6rem;font-weight:800;color:#00b4a0;margin-bottom:4px}
+.cert-org{font-size:.9rem;color:#6b7280;margin-bottom:16px}
+.cert-name{font-size:1.5rem;font-weight:800;color:#1a202c;border-bottom:2px solid #00b4a0;padding-bottom:8px;margin-bottom:12px}
+.cert-detail{font-size:.92rem;color:#374151;margin-bottom:4px}.cert-score{font-size:1.1rem;font-weight:700;color:#00b4a0;margin-top:10px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal-content{background:#fff;border-radius:16px;padding:32px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;position:relative}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#6b7280}
+.login-box{max-width:400px;margin:60px auto;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.1);padding:40px;text-align:center}
+.login-box .icon{font-size:3rem;margin-bottom:16px}.login-box h2{font-size:1.3rem;font-weight:700;margin-bottom:6px}
+.login-box p{color:#6b7280;font-size:.9rem;margin-bottom:24px}
+.login-box .err{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px;border-radius:8px;font-size:.88rem;margin-bottom:12px;display:none}
+.user-card{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.user-card .uinfo{flex:1}.user-card .uname{font-weight:700;margin-bottom:2px}.user-card .uemail{font-size:.85rem;color:#6b7280}
+.user-card .uactions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.form-section{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:20px;margin-bottom:20px}
+.form-section h3{font-size:1rem;font-weight:700;margin-bottom:16px;color:#0369a1}
+.dsp-header{background:linear-gradient(135deg,#00b4a0,#0076c0);color:#fff;padding:20px 24px;border-radius:14px;margin-bottom:24px}
+.dsp-header h2{font-size:1.2rem;font-weight:700}.dsp-header p{font-size:.88rem;opacity:.85;margin-top:4px}
+.link-box{background:#f0f9ff;border:1px solid #00b4a0;border-radius:10px;padding:16px;display:flex;align-items:center;gap:10px;margin-top:12px}
+.link-box input{flex:1;border:none;background:none;font-size:.88rem;color:#1a202c;outline:none;font-family:monospace}
+.spinner{display:none;width:18px;height:18px;border:3px solid #e5e7eb;border-top-color:#00b4a0;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.section-title{font-size:1.1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.text-muted{color:#6b7280;font-size:.85rem}.mt-8{margin-top:8px}.mt-16{margin-top:16px}.mb-16{margin-bottom:16px}
+.video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;background:#000}
+.video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+
+/* Print styles for certificates */
+@media print {
+  @page { size: portrait; margin: 0.5in; }
+  body * { visibility: hidden; }
+  #print-area, #print-area * { visibility: visible; }
+  #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+  .cert-box { page-break-after: always; page-break-inside: avoid; width: 7.5in; max-width: 7.5in; margin: 0 auto 0.5in; padding: 40px; border: 3px solid #00b4a0; box-shadow: none; background: white !important; }
+  .cert-box:last-child { page-break-after: auto; }
+  .modal-close, .btn, button, .header, .admin-nav, .nav-tabs, .form-group, input, select, textarea { display: none !important; }
+  .modal { position: static !important; background: white !important; }
+  .modal-content { box-shadow: none !important; max-width: 100% !important; padding: 0 !important; }
+  /* New dashboard print support */
+  #tc-print-area, #tc-print-area * { visibility: visible !important; }
+  #tc-print-area { position: absolute !important; left: 0; top: 0; width: 100%; padding: 20px; display: block !important; }
+  .tc-toast, .tc-popover { display: none !important; }
+}
+
+/* Modern Clean Styles (existing) */
+.pon-card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:20px;overflow:hidden}
+.pon-card-hdr{background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.pon-card-hdr h2{font-size:1rem;font-weight:700;margin:0;text-transform:uppercase;letter-spacing:.5px}
+.pon-label{display:block;font-size:.85rem;font-weight:600;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
+.pon-input{width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.95rem;transition:border-color .2s}
+.pon-input:focus{outline:none;border-color:#00b4a0}
+.badge-count{background:#e6faf8;color:#00b4a0;border:1px solid #00b4a0;padding:2px 12px;border-radius:20px;font-size:.75rem;font-weight:700;margin-left:8px}
+.pin-display{background:#f0fdfa;color:#00b4a0;font-weight:700;font-family:monospace;padding:4px 12px;border-radius:6px;font-size:.9rem;border:1px solid #99f6e4}
+.action-btn-group{display:flex;gap:6px}
+.btn-deactivate{background:#fff;border:1.5px solid #e2e8f0;color:#64748b;padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer}
+.btn-deactivate:hover{background:#f8fafc;border-color:#cbd5e1}
+.btn-remove{background:#ef4444;border:none;color:#fff;padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer}
+.btn-remove:hover{background:#dc2626}
+.info-banner{background:#e6faf8;border-left:4px solid #00b4a0;border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:.88rem;line-height:1.6;color:#0f766e}
+
+/* ================================================================ */
+/* ===== NEW DASHBOARD STYLES (Outstanding/Completed/Folders) ===== */
+/* ================================================================ */
+.tc-wrap{position:relative;background:#f0f4f8;border-radius:14px;padding:16px;margin-bottom:24px}
+.tc-tab{padding:8px 14px;font-size:13px;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;border-left:none;border-right:none;border-top:none;font-family:inherit}
+.tc-tab.active{color:#00b4a0;border-bottom-color:#00b4a0;font-weight:600}
+.tc-th{text-align:left;padding:8px 8px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;background:#f8fafc;border-bottom:1px solid #e5e7eb;}
+/* Column hide/show via classes on the table wrapper */
+.tc-hide-col-1 .tc-col-1{display:none!important}
+.tc-hide-col-2 .tc-col-2{display:none!important}
+.tc-hide-col-3 .tc-col-3{display:none!important}
+.tc-hide-col-4 .tc-col-4{display:none!important}
+.tc-hide-col-5 .tc-col-5{display:none!important}
+.tc-hide-col-6 .tc-col-6{display:none!important}
+.tc-hide-col-7 .tc-col-7{display:none!important}
+.tc-hide-col-8 .tc-col-8{display:none!important}
+.tc-td{padding:8px 8px;font-size:12px;vertical-align:middle;overflow:hidden;border-bottom:1px solid #f1f5f9}
+.tc-row{transition:background .4s,opacity .3s}
+.tc-row:hover{background:#f8fafc}
+.tc-row.flash{background:#d1fae5}
+.tc-row.leaving{opacity:0}
+.tc-group-hdr{background:#f8fafc;padding:6px 10px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.06em}
+.tc-pill{font-size:11px;padding:2px 8px;border-radius:8px;white-space:nowrap;display:inline-block;font-weight:600}
+.tc-pill-incomplete{background:#fef3c7;color:#92400e}
+.tc-pill-complete{background:#d1fae5;color:#065f46}
+.tc-pill-pass{background:#d1fae5;color:#065f46}
+.tc-pill-fail{background:#fee2e2;color:#991b1b}
+.tc-pill-site{background:#d1fae5;color:#065f46}
+.tc-pill-pons{background:#dbeafe;color:#1e40af}
+.tc-pill-orgwide{background:#f3f4f6;color:#1f2937}
+.tc-toast{position:absolute;bottom:12px;right:12px;background:#1a202c;color:#fff;padding:8px 14px;border-radius:8px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:40}
+.tc-toast.show{opacity:1}
+.tc-empty{padding:40px 20px;text-align:center;color:#9ca3af;font-size:13px}
+.tc-folder-card{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;margin-bottom:8px;gap:8px}
+.tc-folder-btn{font-size:11px;padding:4px 8px;border:1px solid #e5e7eb;border-radius:6px;background:transparent;color:#64748b;cursor:pointer;white-space:nowrap;width:100%;max-width:100%;overflow:hidden;display:inline-flex;align-items:center;gap:4px;box-sizing:border-box;font-family:inherit}
+.tc-folder-btn>span{overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;text-align:left}
+.tc-folder-btn.assigned{color:#1a202c;border-color:#00b4a0;background:#e6faf8}
+.tc-folder-btn:hover{background:#f8fafc;border-color:#00b4a0}
+.tc-popover{position:absolute;background:#fff;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.1);padding:6px;z-index:30;min-width:220px;visibility:hidden}
+.tc-popover.show{visibility:visible}
+.tc-popover-item{padding:7px 10px;font-size:12px;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px}
+.tc-popover-item:hover{background:#f8fafc}
+.tc-popover-divider{height:1px;background:#e5e7eb;margin:4px 0}
+.tc-file-icon{color:#94a3b8;font-size:13px;margin-right:4px}
+.tc-link-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;padding:10px;border-top:1px solid #e5e7eb;align-items:center;background:#fff}
+.tc-link-row:first-of-type{border-top:none}
+.tc-link-input-group{display:flex;flex-direction:column;gap:3px;min-width:0}
+.tc-mini-label{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.tc-inline-input{font-size:13px;padding:6px 8px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;width:100%;font-family:inherit;color:#1a202c;box-sizing:border-box}
+.tc-inline-input.url{font-family:monospace;font-size:11px}
+.tc-inline-input:focus{outline:none;border-color:#00b4a0;box-shadow:0 0 0 2px #e6faf8}
+.tc-confirm-del{display:inline-flex;align-items:center;gap:4px;font-size:11px}
+.tc-confirm-btn{font-size:11px;padding:4px 8px;border:1px solid #fca5a5;color:#dc2626;background:#fef2f2;border-radius:6px;cursor:pointer;font-family:inherit}
+.tc-cancel-btn{font-size:11px;padding:4px 8px;cursor:pointer;border:1px solid #e5e7eb;border-radius:6px;background:transparent;font-family:inherit}
+.tc-draft-card{padding:12px 14px;border-top:1px solid #e5e7eb;background:#fff}
+.tc-draft-card:first-of-type{border-top:none}
+.tc-draft-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.tc-draft-url{font-size:10px;color:#94a3b8;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.tc-name-label{font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+#tc-print-area{display:none}
+</style>
+</head>
+<body>
+
+<!-- ====================================================================== -->
+<!-- ===== HOMEPAGE ======================================================= -->
+<!-- ====================================================================== -->
+<div id="homepage" style="display:none">
+  <div class="header"><div class="header-left" style="margin-left:72px;margin-top:36px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" height="44" style="display:block"><rect x="0" y="2" width="22" height="22" fill="#00b4a0"/><polygon points="26,24 48,24 37,2" fill="#F5C518"/><circle cx="11" cy="39" r="11" fill="#F5C518"/><path d="M 37,28 A 11,11 0 0,0 37,50 Z" fill="#00b4a0"/><rect x="37" y="28" width="11" height="22" fill="#00b4a0"/><text x="56" y="26" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">HASC</text><text x="56" y="50" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">CENTER</text></svg></div></div>
+  <div class="container" style="max-width:700px;margin-top:60px">
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="font-size:2rem;font-weight:800;color:#1a202c;margin-bottom:8px"> Training Portal</div>
+      <p style="color:#6b7280">Select your portal below. Staff manage training sessions; Admin views all data.</p>
+    </div>
+    <div class="portal-grid">
+      <div class="portal-card nurse" onclick="showPortal('nurse')"><div class="icon">👩‍⚕️</div><h3>Training Portal</h3><p>Set up training sessions, generate training links, view completion certificates.</p></div>
+      <div class="portal-card admin" onclick="showPortal('admin')"><div class="icon">🔑</div><h3>Staff Access Manager</h3><p>Admin only — view all training data, manage staff and admin accounts.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- ===== TRAINING PORTAL (formerly Nurse Portal) ======================== -->
+<!-- ====================================================================== -->
+<div id="nurse-portal" style="display:none">
+
+  <!-- ----- Training Portal: Header ----- -->
+  <div class="header">
+    <div class="header-left" style="margin-left:72px;margin-top:36px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" height="44" style="display:block"><rect x="0" y="2" width="22" height="22" fill="#00b4a0"/><polygon points="26,24 48,24 37,2" fill="#F5C518"/><circle cx="11" cy="39" r="11" fill="#F5C518"/><path d="M 37,28 A 11,11 0 0,0 37,50 Z" fill="#00b4a0"/><rect x="37" y="28" width="11" height="22" fill="#00b4a0"/><text x="56" y="26" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">HASC</text><text x="56" y="50" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">CENTER</text></svg></div>
+    <div class="header-right" id="nurse-header-actions" style="display:none">
+      <div style="position:relative;display:inline-block;margin-right:216px">
+        <button onclick="toggleSwitcherMenu()" style="background:#fff;border:1px solid #e2e8f0;color:#374151;padding:6px 12px;border-radius:6px;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:600">
+          <span>⚡ Switch Portal</span>
+          <span style="font-size:.7rem">▼</span>
+        </button>
+        <div id="nurse-switcher-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);min-width:180px;z-index:1000">
+          <button onclick="switchPortal('nurse')" style="display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151;border-bottom:1px solid #f3f4f6">
+            👩‍⚕️ Training Portal
+          </button>
+          <button onclick="switchPortal('admin')" style="display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151">
+            🔑 Admin Portal
+          </button>
+        </div>
+      </div>
+      <span id="nurse-name-lbl" style="font-size:.88rem;color:#6b7280;font-weight:600"></span>
+      <button class="btn btn-secondary btn-sm" onclick="nurseLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- ----- Training Portal: Login ----- -->
+  <div id="nurse-login"><div class="login-box">
+    <div class="icon">👩‍⚕️</div><h2> Staff Login</h2><p> Training Portal</p>
+    <div id="nurse-err" class="err"></div>
+    <div class="form-group" style="text-align:left"><label>Email Address</label><input type="email" id="nurse-email" placeholder="you@hasccenter.org"/></div>
+    <div class="form-group" style="text-align:left"><label>4-Digit PIN</label>
+      <div class="pin-group" id="nurse-pin-group">
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric"/>
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric"/>
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric"/>
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric"/>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="asyncCall(nurseLogin)"><span class="spinner" id="nurse-spin"></span> Sign In</button>
+    <button class="btn btn-secondary" style="width:100%;margin-top:10px" onclick="goHome()">← Back</button>
+  </div></div>
+
+  <!-- ----- Training Portal: Main (Tabs) ----- -->
+  <div id="nurse-main" style="display:none">
+    <div class="container">
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-setup" onclick="switchNurseTab('setup')">📋 Setup Training</button>
+        <button class="tab-btn" id="tab-dash" onclick="switchNurseTab('dash')">📊 Dashboard</button>
+        <button class="tab-btn" id="tab-questions" onclick="switchNurseTab('questions')">💬 Questions <span id="q-badge" style="background:#ef4444;color:white;border-radius:99px;font-size:0.72rem;font-weight:700;padding:1px 7px;margin-left:6px;display:none;">0</span></button>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- ===== TRAINING PORTAL: SETUP TRAINING TAB (QUIZ SECTION) === -->
+      <!-- ============================================================ -->
+      <div id="nurse-setup-tab">
+        <div class="card"><h2>📋 Create Training Session</h2>
+          <div id="setup-alert"></div>
+          <div class="two-col">
+            <div class="form-group"><label>Residence Name *</label><select id="s-res" style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:.95rem;color:#374151;background:#fff"><option value="">-- Select Residence --</option><option value="1068 East 14th Street">1068 East 14th Street</option><option value="1503 East 14th Street">1503 East 14th Street</option><option value="19th Avenue - 4801">19th Avenue - 4801</option><option value="46th Street - 1327">46th Street - 1327</option><option value="46th Street - 1771 1st Fl">46th Street - 1771 1st Fl</option><option value="46th Street - 1771 2nd Fl">46th Street - 1771 2nd Fl</option><option value="48th Street - 1268">48th Street - 1268</option><option value="50th Street - 918">50th Street - 918</option><option value="53rd Street - 1038">53rd Street - 1038</option><option value="Avenue H - 824">Avenue H - 824</option><option value="Avenue I - 2802">Avenue I - 2802</option><option value="Avenue J - 1010">Avenue J - 1010</option><option value="Avenue J - 1014 6B">Avenue J - 1014 6B</option><option value="Avenue J - 1014 6F">Avenue J - 1014 6F</option><option value="Avenue K - 1010">Avenue K - 1010</option><option value="Avenue L - 1122">Avenue L - 1122</option><option value="Avenue S">Avenue S</option><option value="Bedford Avenue - 3245">Bedford Avenue - 3245</option><option value="Coney Island Ave - 2173">Coney Island Ave - 2173</option><option value="Crown Heights - 580">Crown Heights - 580</option><option value="Ditmas Avenue - 804">Ditmas Avenue - 804</option><option value="East 13th Street - 1857">East 13th Street - 1857</option><option value="East 21 - 2102 Ave I">East 21 - 2102 Ave I</option><option value="East 35th St - 1431">East 35th St - 1431</option><option value="East 36th Street - 3521">East 36th Street - 3521</option><option value="East 7th Street (Ave N)">East 7th Street (Ave N)</option><option value="East 8th Street - 536">East 8th Street - 536</option><option value="East 9th - 1367">East 9th - 1367</option><option value="Kings Highway - 2416">Kings Highway - 2416</option><option value="Mill Basin">Mill Basin</option><option value="Montgomery St (fmr Kingston Ave)">Montgomery St (fmr Kingston Ave)</option><option value="New York Avenue">New York Avenue</option><option value="Staten Island">Staten Island</option><option value="Webster Avenue - 373">Webster Avenue - 373</option></select></div>
+            <div class="form-group"><label>Individual Name *</label><input type="text" id="s-ind" placeholder="Individual being trained on"/></div>
+          </div>
+          <div class="form-group"><label>Video URL (ScreenPal) *</label><input type="text" id="s-video" placeholder="Paste full ScreenPal embed link"/></div>
+          <div class="form-group"><label>PON Training Document (optional)</label><input type="file" id="s-doc-file" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg" onchange="uploadDoc()"/><div id="s-doc-status" style="font-size:.85rem;margin-top:6px;color:#6b7280"></div><input type="hidden" id="s-doc"/></div>
+          <div class="card" style="background:#f8fafc;border:1px solid #e5e7eb;padding:20px;margin-top:20px">
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px">Quiz Questions (5 Required)</h3>
+            <div id="q-container"></div>
+            <button class="btn btn-secondary btn-sm" onclick="addQ()" style="margin-top:12px;display:none">+ Add Question</button>
+          </div>
+          <button class="btn btn-success" style="width:100%;margin-top:20px" onclick="asyncCall(createSession)">✅ Create Session &amp; Generate Link</button>
+        </div>
+        <div id="link-result" style="display:none;margin-top:24px" class="card">
+          <h2>✅ Session Created!</h2>
+          <p style="color:#6b7280;margin-bottom:16px">Share this link with the DSP to begin training.</p>
+          <div class="link-box">
+            <input type="text" id="link-val" readonly/>
+            <button class="btn btn-primary btn-sm" onclick="copyLink()">Copy Link</button>
+          </div>
+          <button class="btn btn-secondary" style="margin-top:16px" onclick="resetSetup()">+ Create Another</button>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- ===== TRAINING PORTAL: DASHBOARD TAB (NEW — REPLACES OLD) ===== -->
+      <!-- ================================================================ -->
+      <div id="nurse-dash-tab" style="display:none">
+
+        <!-- NEW DASHBOARD WRAPPER (visible) -->
+        <div id="tc-wrapper" class="tc-wrap">
+
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 8px;">
+            <div style="font-size:12px;color:#64748b;">
+              <span>Trainings</span><span style="margin:0 6px;">›</span><span id="tc-crumb" style="color:#1a202c;font-weight:600;">Outstanding</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-secondary btn-sm" onclick="tcOpenColumnsMenu(event)">⋮ Columns</button>
+              <button class="btn btn-secondary btn-sm" onclick="tcExport()">📊 Export XLS</button>
+              <button class="btn btn-secondary btn-sm" onclick="tcPrint()">🖨️ Print</button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:0;border-bottom:1px solid #e5e7eb;margin-bottom:12px;" id="tc-tabs">
+            <button class="tc-tab active" data-tab="completed">Completed</button>
+            <button class="tc-tab" data-tab="links">Training Links</button>
+            <button class="tc-tab" data-tab="folders">Folders</button>
+          </div>
+
+          <div id="tc-filters" style="display:grid;grid-template-columns:repeat(2,1fr) auto;gap:8px;margin-bottom:12px;">
+            <div>
+              <label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em;">Residence</label>
+              <select id="tc-f-loc" style="font-size:12px;width:100%;padding:6px 8px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;"></select>
+            </div>
+            <div>
+              <label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em;">Training type</label>
+              <select id="tc-f-type" style="font-size:12px;width:100%;padding:6px 8px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;">
+                <option value="all">All types</option>
+                <option value="Site">Site</option>
+                <option value="PONS">PONS</option>
+                <option value="Org-wide">Org-wide</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:flex-end;">
+              <button class="btn btn-secondary btn-sm" onclick="tcClear()">Clear</button>
+            </div>
+          </div>
+
+          <div id="tc-groupbar" style="display:flex;gap:10px;align-items:center;margin-bottom:8px;font-size:12px;color:#64748b;">
+            <span>Group by:</span>
+            <select id="tc-f-group" style="font-size:12px;padding:4px 8px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;">
+              <option value="location">Residence</option>
+              <option value="training">Training</option>
+              <option value="staff">Staff</option>
+              <option value="none">No grouping</option>
+            </select>
+            <span style="margin-left:auto;" id="tc-count">Loading...</span>
+          </div>
+
+          <div id="tc-content" style="background:#fff;border-radius:10px;border:1px solid #e5e7eb;min-height:200px;"></div>
+
+          <div id="tc-popover" class="tc-popover"></div>
+          <div id="tc-toast" class="tc-toast"></div>
+        </div>
+
+        <!-- LEGACY DOM (hidden — kept so old certificate code doesn't break) -->
+        <div style="display:none">
+          <div class="filter-bar">
+            <select id="f-res"><option value="">All</option></select>
+            <input type="date" id="f-from"/>
+            <input type="date" id="f-to"/>
+            <input type="text" id="f-search"/>
+          </div>
+          <table id="cert-table"><thead><tr><th><input type="checkbox" id="nurse-select-all" onchange="toggleSelectAll(false)"/></th><th>Date</th><th>Residence</th><th>Individual</th><th>DSP Name</th><th>Role</th><th>Score</th><th>Status</th><th>Actions</th></tr></thead><tbody id="cert-body"></tbody></table>
+          <button id="nurse-print-sel-btn" style="display:none"></button>
+          <button id="nurse-export-xls-btn" style="display:none"></button>
+        </div>
+
+      </div>
+      <!-- ===== END DASHBOARD TAB ===== -->
+
+      <!-- ================================================================ -->
+      <!-- ===== TRAINING PORTAL: QUESTIONS TAB (NEW DESIGN) ============== -->
+      <!-- ================================================================ -->
+      <div id="nurse-questions-tab" style="display:none">
+        <div style="display:flex;align-items:center;gap:8px;margin:0 0 14px;font-size:13px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.06em;">
+          <span style="font-size:16px;">⏳</span> Pending Questions
+          <span id="q-inbox-count" style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:none;letter-spacing:0;margin-left:4px;"></span>
+        </div>
+        <div id="q-inbox-list">
+          <div style="text-align:center;padding:50px 20px;color:#9ca3af;background:#fff;border-radius:12px;border:1px solid #f1f5f9;">
+            <div style="font-size:2.5rem;">✅</div>
+            <p style="font-weight:600;margin-top:8px;">No pending questions</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- ===== ADMIN PORTAL =================================================== -->
+<!-- ====================================================================== -->
+<div id="admin-portal" style="display:none">
+
+  <!-- ----- Admin Portal: Header ----- -->
+  <div class="header">
+    <div class="header-left" style="margin-left:72px;margin-top:36px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" height="44" style="display:block"><rect x="0" y="2" width="22" height="22" fill="#00b4a0"/><polygon points="26,24 48,24 37,2" fill="#F5C518"/><circle cx="11" cy="39" r="11" fill="#F5C518"/><path d="M 37,28 A 11,11 0 0,0 37,50 Z" fill="#00b4a0"/><rect x="37" y="28" width="11" height="22" fill="#00b4a0"/><text x="56" y="26" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">HASC</text><text x="56" y="50" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">CENTER</text></svg></div>
+    <div class="header-right" id="admin-header-actions" style="display:none">
+      <div style="position:relative;display:inline-block;margin-right:216px">
+        <button onclick="toggleAdminSwitcherMenu()" style="background:#fff;border:1px solid #e2e8f0;color:#374151;padding:6px 12px;border-radius:6px;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:600">
+          <span>⚡ Switch Portal</span>
+          <span style="font-size:.7rem">▼</span>
+        </button>
+        <div id="admin-switcher-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);min-width:180px;z-index:1000">
+          <button onclick="switchPortal('nurse')" style="display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151;border-bottom:1px solid #f3f4f6">
+            👩‍⚕️ Training Portal
+          </button>
+          <button onclick="switchPortal('admin')" style="display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.9rem;color:#374151">
+            🔑 Admin Portal
+          </button>
+        </div>
+      </div>
+      <span id="admin-name-lbl" style="font-size:.88rem;color:#6b7280;font-weight:600"></span>
+      <button class="btn btn-secondary btn-sm" onclick="adminLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- ----- Admin Portal: Login ----- -->
+  <div id="admin-login"><div class="login-box">
+    <div class="icon">🔑</div><h2>Admin Login</h2><p>Staff Access Manager</p>
+    <div id="admin-err" class="err"></div>
+    <div class="form-group" style="text-align:left"><label>Username</label><input type="text" id="admin-user" placeholder="Your username"/></div>
+    <div class="form-group" style="text-align:left"><label>4-Digit PIN</label>
+      <div class="pin-group" id="admin-pin-group">
+        <input class="adm-pin" type="password" maxlength="1" inputmode="numeric"/>
+        <input class="adm-pin" type="password" maxlength="1" inputmode="numeric"/>
+        <input class="adm-pin" type="password" maxlength="1" inputmode="numeric"/>
+        <input class="adm-pin" type="password" maxlength="1" inputmode="numeric"/>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="asyncCall(adminLogin)"><span class="spinner" id="admin-spin"></span> Sign In</button>
+    <button class="btn btn-secondary" style="width:100%;margin-top:10px" onclick="goHome()">← Back</button>
+  </div></div>
+
+  <!-- ----- Admin Portal: Main (Tabs) ----- -->
+  <div id="admin-main" style="display:none">
+    <div class="admin-nav">
+      <span>Admin</span>
+      <button class="admin-nav-btn active" id="nav-dash" onclick="switchAdminTab('dash')">📊 Dashboard</button>
+      <button class="admin-nav-btn" id="nav-staff" onclick="switchAdminTab('staff')">👥 Manage Staff</button>
+      <button class="admin-nav-btn" id="nav-admins" onclick="switchAdminTab('admins')">🔐 Manage Admins</button>
+      <button class="admin-nav-btn" id="nav-home" onclick="goHome()" style="margin-left:auto">🏠 Home</button>
+    </div>
+    <div class="container">
+
+      <!-- ===== ADMIN: DASHBOARD TAB ===== -->
+      <div id="admin-dash-tab">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="num" id="a-total">0</div><div class="lbl">Total Certificates</div></div>
+          <div class="stat-card"><div class="num" id="a-pass">0</div><div class="lbl">Passed</div></div>
+          <div class="stat-card"><div class="num" id="a-fail">0</div><div class="lbl">Failed</div></div>
+          <div class="stat-card"><div class="num" id="a-today">0</div><div class="lbl">Today</div></div>
+        </div>
+        <div class="card">
+          <h2 style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap">
+            <span>📜 All Certificates</span>
+            <button class="btn btn-primary btn-sm" id="admin-print-sel-btn" onclick="printSelected(true)" style="display:none">🖨️ Print Selected</button>
+          </h2>
+          <div class="filter-bar">
+            <div><label style="font-size:.8rem;font-weight:600;margin-bottom:4px;display:block">Residence</label><select id="af-res" onchange="filterACerts()"><option value="">All</option></select></div>
+            <div><label style="font-size:.8rem;font-weight:600;margin-bottom:4px;display:block">Date From</label><input type="date" id="af-from" onchange="filterACerts()"/></div>
+            <div><label style="font-size:.8rem;font-weight:600;margin-bottom:4px;display:block">Date To</label><input type="date" id="af-to" onchange="filterACerts()"/></div>
+            <div><label style="font-size:.8rem;font-weight:600;margin-bottom:4px;display:block">Search DSP</label><input type="text" id="af-search" placeholder="Name..." oninput="filterACerts()"/></div>
+          </div>
+          <div class="table-wrap"><table id="admin-cert-table"><thead><tr><th><input type="checkbox" id="admin-select-all" onchange="toggleSelectAll(true)"/></th><th>Date</th><th>Nurse</th><th>Residence</th><th>Individual</th><th>DSP Name</th><th>Role</th><th>Score</th><th>Status</th><th>Actions</th></tr></thead><tbody id="admin-cert-body"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ===== ADMIN: MANAGE STAFF TAB ===== -->
+      <div id="admin-staff-tab" style="display:none">
+        <div class="card">
+          <h2>👥 Manage Staff</h2>
+          <div class="info-banner">✨ <strong>Add a nurse:</strong> Fill the form below and click Add. The staff will receive email + PIN credentials for the Training Portal.</div>
+          <div class="form-section">
+            <h3>➕ Add New Nurse</h3>
+            <div id="add-nurse-alert"></div>
+            <div class="two-col">
+              <div class="form-group"><label>Full Name *</label><input type="text" id="new-name" placeholder="e.g. Jane Smith"/></div>
+              <div class="form-group"><label>Email *</label><input type="email" id="new-email" placeholder="jsmith@hasccenter.org"/></div>
+            </div>
+            <div class="form-group"><label>Create 4-Digit PIN *</label>
+              <div class="pin-group" id="new-pin-group">
+                <input class="new-pin" type="password" maxlength="1" inputmode="numeric"/>
+                <input class="new-pin" type="password" maxlength="1" inputmode="numeric"/>
+                <input class="new-pin" type="password" maxlength="1" inputmode="numeric"/>
+                <input class="new-pin" type="password" maxlength="1" inputmode="numeric"/>
+              </div>
+            </div>
+            <button class="btn btn-success" onclick="asyncCall(addNurse)">✅ Add Nurse</button>
+          </div>
+          <div class="pon-card">
+            <div class="pon-card-hdr"><h2>All Nurses <span class="badge-count" id="nurse-count">0</span></h2></div>
+            <div id="nurse-list" style="padding:16px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ADMIN: MANAGE ADMINS TAB ===== -->
+      <div id="admin-admins-tab" style="display:none">
+        <div class="card">
+          <h2>🔐 Manage Admin Accounts</h2>
+          <div class="info-banner">🔐 <strong>Admin accounts:</strong> Can access the Staff Access Manager portal. The owner account (mshilcrat) cannot be removed.</div>
+          <div class="form-section">
+            <h3>➕ Add New Admin</h3>
+            <div id="add-admin-alert"></div>
+            <div class="two-col">
+              <div class="form-group"><label>Username *</label><input type="text" id="new-admin-user" placeholder="e.g. jdoe"/></div>
+              <div class="form-group"><label>Email *</label><input type="email" id="new-admin-email" placeholder="jdoe@hasccenter.org"/></div>
+            </div>
+            <div class="form-group"><label>Create 4-Digit PIN *</label>
+              <div class="pin-group" id="new-admin-pin-group">
+                <input class="admin-new-pin" type="password" maxlength="1" inputmode="numeric"/>
+                <input class="admin-new-pin" type="password" maxlength="1" inputmode="numeric"/>
+                <input class="admin-new-pin" type="password" maxlength="1" inputmode="numeric"/>
+                <input class="admin-new-pin" type="password" maxlength="1" inputmode="numeric"/>
+              </div>
+            </div>
+            <button class="btn btn-success" onclick="asyncCall(addAdmin)">✅ Add Admin</button>
+          </div>
+          <div class="pon-card">
+            <div class="pon-card-hdr"><h2>All Admins <span class="badge-count" id="admin-count">0</span></h2></div>
+            <div id="admin-list" style="padding:16px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- ===== CERTIFICATE MODAL ============================================== -->
+<!-- ====================================================================== -->
+<div id="cert-modal" class="modal"><div class="modal-content">
+  <button class="modal-close" onclick="closeCert()">×</button>
+  <div id="cert-content"></div>
+</div></div>
+
+<!-- Print area for new dashboard -->
+<div id="tc-print-area"></div>
+
+<!-- ====================================================================== -->
+<!-- ===== SCRIPTS: CONFIG & STATE ======================================== -->
+<!-- ====================================================================== -->
+<script>
+const SUPA_URL='https://xqcykvgsesavtuautivq.supabase.co';
+const SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY3lrdmdzZXNhdnR1YXV0aXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMzc1ODUsImV4cCI6MjA5MTkxMzU4NX0.A6FkxttGZMGaPxqr1orOWlpoO_zZSeqbp5W3L7s6U5w';
+const sb=supabase.createClient(SUPA_URL,SUPA_ANON);
+const ADMIN_HARDCODE={username:'mshilcrat',email:'mshilcrat@hasccenter.org',pin:'1147'};
+const NURSES=[
+  {email:'mshilcrat@hasccenter.org',name:'Michael Shilcrat',pin:'9979'},
+  {email:'fziskind@hasccenter.org',name:'Frumie Ziskind',pin:'2006'},
+  {email:'mshilcrat@gmail.com',name:'mshilcrat',pin:'2508'},
+  {email:'avisacks@hasccenter.org',name:'Avi Sacks',pin:'2803'},
+  {email:'ssinger@hasccenter.org',name:'Shmuel Singer',pin:'4124'},
+  {email:'llebovits@hasccenter.org',name:'Leedor Lebovits',pin:'1817'}
+];
+let currentNurse=null,currentAdminUser=null,certs=[],aCerts=[],qCount=0,selectedCerts=[],selectedAdminCerts=[];
+
+/* ===== PORTAL NAVIGATION ===== */
+function showPortal(p){document.getElementById('homepage').style.display='none';if(p==='nurse'){document.getElementById('nurse-portal').style.display='block';}else{document.getElementById('admin-portal').style.display='block';}}
+function goHome(){document.getElementById('nurse-portal').style.display='none';document.getElementById('admin-portal').style.display='none';document.getElementById('homepage').style.display='block';nurseLogout();adminLogout();const nurseMenu=document.getElementById('nurse-switcher-menu');const adminMenu=document.getElementById('admin-switcher-menu');if(nurseMenu)nurseMenu.style.display='none';if(adminMenu)adminMenu.style.display='none';}
+function toggleSwitcherMenu(){const menu=document.getElementById('nurse-switcher-menu');if(menu){menu.style.display=menu.style.display==='none'?'block':'none';}}
+function toggleAdminSwitcherMenu(){const menu=document.getElementById('admin-switcher-menu');if(menu){menu.style.display=menu.style.display==='none'?'block':'none';}}
+function switchPortal(target){if(target==='nurse'){document.getElementById('admin-portal').style.display='none';document.getElementById('nurse-portal').style.display='block';adminLogout();}else{document.getElementById('nurse-portal').style.display='none';document.getElementById('admin-portal').style.display='block';nurseLogout();}const nurseMenu=document.getElementById('nurse-switcher-menu');const adminMenu=document.getElementById('admin-switcher-menu');if(nurseMenu)nurseMenu.style.display='none';if(adminMenu)adminMenu.style.display='none';}
+document.addEventListener('click',function(e){const nurseMenu=document.getElementById('nurse-switcher-menu');const adminMenu=document.getElementById('admin-switcher-menu');const nurseBtn=e.target.closest('button[onclick="toggleSwitcherMenu()"]');const adminBtn=e.target.closest('button[onclick="toggleAdminSwitcherMenu()"]');if(!nurseBtn&&nurseMenu&&!nurseMenu.contains(e.target)){nurseMenu.style.display='none';}if(!adminBtn&&adminMenu&&!adminMenu.contains(e.target)){adminMenu.style.display='none';}});
+function asyncCall(fn){return fn();}
+
+/* ===== PIN INPUT HELPERS ===== */
+(function(){const grp=document.getElementById('nurse-pin-group');if(grp){const pins=grp.querySelectorAll('.pin-digit');pins.forEach((p,i)=>{p.addEventListener('input',()=>{if(p.value.length===1&&i<pins.length-1)pins[i+1].focus();});p.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!p.value&&i>0)pins[i-1].focus();});});}})();
+(function(){const grp=document.getElementById('admin-pin-group');if(grp){const pins=grp.querySelectorAll('.adm-pin');pins.forEach((p,i)=>{p.addEventListener('input',()=>{if(p.value.length===1&&i<pins.length-1)pins[i+1].focus();});p.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!p.value&&i>0)pins[i-1].focus();});});}})();
+(function(){const grp=document.getElementById('new-pin-group');if(grp){const pins=grp.querySelectorAll('.new-pin');pins.forEach((p,i)=>{p.addEventListener('input',()=>{if(p.value.length===1&&i<pins.length-1)pins[i+1].focus();});p.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!p.value&&i>0)pins[i-1].focus();});});}})();
+(function(){const grp=document.getElementById('new-admin-pin-group');if(grp){const pins=grp.querySelectorAll('.admin-new-pin');pins.forEach((p,i)=>{p.addEventListener('input',()=>{if(p.value.length===1&&i<pins.length-1)pins[i+1].focus();});p.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!p.value&&i>0)pins[i-1].focus();});});}})();
+
+/* ===== LOGIN / LOGOUT ===== */
+async function nurseLogin(){const email=document.getElementById('nurse-email').value.trim().toLowerCase();const pinInputs=document.querySelectorAll('#nurse-pin-group .pin-digit');const pin=Array.from(pinInputs).map(i=>i.value).join('');const err=document.getElementById('nurse-err');err.style.display='none';err.textContent='';if(!email||pin.length!==4){err.textContent='Please enter email and 4-digit PIN.';err.style.display='block';return;}const{data:nd}=await sb.from('nurse_staff').select('*').eq('email',email).eq('pin',pin).eq('active',true).limit(1);const n=nd&&nd[0];if(!n){err.textContent='Invalid credentials.';err.style.display='block';return;}currentNurse=n;document.getElementById('nurse-login').style.display='none';document.getElementById('nurse-main').style.display='block';document.getElementById('nurse-header-actions').style.display='flex';document.getElementById('nurse-name-lbl').textContent=n.name;addQ();addQ();addQ();addQ();addQ();await loadCerts();}
+function nurseLogout(){currentNurse=null;document.getElementById('nurse-main').style.display='none';document.getElementById('nurse-login').style.display='block';document.getElementById('nurse-header-actions').style.display='none';document.getElementById('nurse-email').value='';const pinInputs=document.querySelectorAll('#nurse-pin-group .pin-digit');pinInputs.forEach(p=>p.value='');resetSetup();}
+async function adminLogin(){const user=document.getElementById('admin-user').value.trim().toLowerCase();const pinInputs=document.querySelectorAll('#admin-pin-group .adm-pin');const pin=Array.from(pinInputs).map(i=>i.value).join('');const err=document.getElementById('admin-err');err.style.display='none';err.textContent='';if(!user||pin.length!==4){err.textContent='Please enter username and PIN.';err.style.display='block';return;}if(user===ADMIN_HARDCODE.username&&pin===ADMIN_HARDCODE.pin){currentAdminUser={username:user,email:ADMIN_HARDCODE.email,role:'owner'};document.getElementById('admin-login').style.display='none';document.getElementById('admin-main').style.display='block';document.getElementById('admin-header-actions').style.display='flex';document.getElementById('admin-name-lbl').textContent=user;await loadAdmin();return;}const{data:aRow,error:aErr}=await sb.from('admin_accounts').select('email,combined,name,role').eq('username',user).eq('active',true).single();if(aErr||!aRow){err.textContent='Invalid admin credentials.';err.style.display='block';return;}async function sha2(x){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(x));return Array.from(new Uint8Array(b)).map(b=>b.toString(16).padStart(2,'0')).join('');}const cb=await sha2(aRow.email+pin);if(cb!==aRow.combined){err.textContent='Invalid admin credentials.';err.style.display='block';return;}currentAdminUser={username:user,email:aRow.email,role:aRow.role||'admin'};document.getElementById('admin-login').style.display='none';document.getElementById('admin-main').style.display='block';document.getElementById('admin-header-actions').style.display='flex';document.getElementById('admin-name-lbl').textContent=user;await loadAdmin();}
+function adminLogout(){currentAdminUser=null;document.getElementById('admin-main').style.display='none';document.getElementById('admin-login').style.display='block';document.getElementById('admin-header-actions').style.display='none';document.getElementById('admin-user').value='';const pinInputs=document.querySelectorAll('#admin-pin-group .adm-pin');pinInputs.forEach(p=>p.value='');}
+
+/* ===== TAB SWITCHING ===== */
+function switchNurseTab(t){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));if(t==='setup'){document.getElementById('tab-setup').classList.add('active');document.getElementById('nurse-setup-tab').style.display='block';document.getElementById('nurse-dash-tab').style.display='none';}else{document.getElementById('tab-dash').classList.add('active');document.getElementById('nurse-dash-tab').style.display='block';document.getElementById('nurse-setup-tab').style.display='none';loadCerts();if(window.tcRender)window.tcRender();}}
+function switchAdminTab(t){document.querySelectorAll('.admin-nav-btn').forEach(b=>b.classList.remove('active'));if(t==='dash'){document.getElementById('nav-dash').classList.add('active');document.getElementById('admin-dash-tab').style.display='block';document.getElementById('admin-staff-tab').style.display='none';document.getElementById('admin-admins-tab').style.display='none';loadAdmin();}else if(t==='staff'){document.getElementById('nav-staff').classList.add('active');document.getElementById('admin-dash-tab').style.display='none';document.getElementById('admin-staff-tab').style.display='block';document.getElementById('admin-admins-tab').style.display='none';loadNurseList();}else if(t==='admins'){document.getElementById('nav-admins').classList.add('active');document.getElementById('admin-dash-tab').style.display='none';document.getElementById('admin-staff-tab').style.display='none';document.getElementById('admin-admins-tab').style.display='block';loadAdminList();}}
+
+/* ===== QUIZ SECTION (Setup Training) ===== */
+function addQ(){qCount++;const c=document.getElementById('q-container');const d=document.createElement('div');d.className='question-builder';d.innerHTML=`<h4>Question ${qCount}</h4><div class="form-group"><input type="text" class="q-text" placeholder="Enter question text..."/></div><div class="options-grid"><div class="option-row"><input type="text" class="q-opt" data-letter="A" placeholder="Option A"/><input type="radio" name="q${qCount}" value="A"/><span class="correct-label">Correct</span></div><div class="option-row"><input type="text" class="q-opt" data-letter="B" placeholder="Option B"/><input type="radio" name="q${qCount}" value="B"/><span class="correct-label">Correct</span></div><div class="option-row"><input type="text" class="q-opt" data-letter="C" placeholder="Option C"/><input type="radio" name="q${qCount}" value="C"/><span class="correct-label">Correct</span></div><div class="option-row"><input type="text" class="q-opt" data-letter="D" placeholder="Option D"/><input type="radio" name="q${qCount}" value="D"/><span class="correct-label">Correct</span></div></div>`;c.appendChild(d);}
+async function uploadDoc(){const f=document.getElementById('s-doc-file').files[0];const st=document.getElementById('s-doc-status');if(!f){return;}st.textContent='Uploading...';st.style.color='#6b7280';try{const ext=f.name.split('.').pop();const path=crypto.randomUUID()+'.'+ext;const{error}=await sb.storage.from('pon-docs').upload(path,f,{upsert:false});if(error)throw error;const{data}=sb.storage.from('pon-docs').getPublicUrl(path);document.getElementById('s-doc').value=data.publicUrl;st.textContent='✅ Document uploaded: '+f.name;st.style.color='#059669';}catch(e){st.textContent='❌ Upload failed: '+e.message;st.style.color='#dc2626';document.getElementById('s-doc').value='';}}
+async function createSession(){const alert=document.getElementById('setup-alert');alert.innerHTML='';const res=document.getElementById('s-res').value;const ind=document.getElementById('s-ind').value.trim();const video=document.getElementById('s-video').value.trim();if(!res||!ind){alert.innerHTML='<div class="alert alert-error">Please fill all required fields.</div>';return;}const doc=document.getElementById('s-doc').value.trim();if(!video&&!doc){alert.innerHTML='<div class="alert alert-error">Please provide a training video or upload a document.</div>';return;}const qs=[];const qNodes=document.querySelectorAll('.question-builder');if(qNodes.length<5){alert.innerHTML='<div class="alert alert-error">You must add exactly 5 questions.</div>';return;}for(let i=0;i<qNodes.length;i++){const n=qNodes[i];const txt=n.querySelector('.q-text').value.trim();const opts=n.querySelectorAll('.q-opt');const optA=opts[0].value.trim(),optB=opts[1].value.trim(),optC=opts[2].value.trim(),optD=opts[3].value.trim();const corr=n.querySelector('input[type=radio]:checked');if(!txt||!optA||!optB||!optC||!optD||!corr){alert.innerHTML='<div class="alert alert-error">Please complete all 5 questions with text, options, and correct answer.</div>';return;}qs.push({question:txt,optionA:optA,optionB:optB,optionC:optC,optionD:optD,correctOption:corr.value});}const token=crypto.randomUUID();const{data,error}=await sb.from('training_sessions').insert({nurse_email:currentNurse.email,residence:res,individual_name:ind,video_url:video,document_url:doc,questions:qs,session_token:token}).select().single();if(error){alert.innerHTML='<div class="alert alert-error">Error creating session: '+error.message+'</div>';return;}const link=window.location.origin+window.location.pathname.replace('index.html','')+'dsp-training.html?token='+token;document.getElementById('link-val').value=link;document.getElementById('link-result').style.display='block';document.querySelector('#nurse-setup-tab .card').style.display='none';}
+function resetSetup(){document.getElementById('link-result').style.display='none';document.querySelector('#nurse-setup-tab .card').style.display='block';document.getElementById('s-res').value='';document.getElementById('s-ind').value='';document.getElementById('s-video').value='';document.getElementById('s-doc').value='';if(document.getElementById('s-doc-file'))document.getElementById('s-doc-file').value='';if(document.getElementById('s-doc-status'))document.getElementById('s-doc-status').textContent='';qCount=0;document.getElementById('q-container').innerHTML='';addQ();addQ();addQ();addQ();addQ();}
+function copyLink(){const inp=document.getElementById('link-val');inp.select();document.execCommand('copy');alert('Link copied to clipboard!');}
+
+/* ===== CERTIFICATES (LEGACY — kept so existing logic doesn't break; new dashboard above replaces user-facing view) ===== */
+async function loadCerts(){if(!currentNurse)return;const{data,error}=await sb.from('certificates').select('*').eq('nurse_email',currentNurse.email).order('completed_at',{ascending:false});if(error){console.error(error);return;}certs=data||[];renderCerts();const resSet=new Set(certs.map(c=>c.residence).filter(Boolean));const sel=document.getElementById('f-res');if(sel){sel.innerHTML='<option value="">All</option>';resSet.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;sel.appendChild(o);});}}
+function renderCerts(){const fResEl=document.getElementById('f-res');const fFromEl=document.getElementById('f-from');const fToEl=document.getElementById('f-to');const fSearchEl=document.getElementById('f-search');if(!fResEl)return;const filtered=certs.filter(c=>{const fRes=fResEl.value;const fFrom=fFromEl.value;const fTo=fToEl.value;const fSearch=fSearchEl.value.trim().toLowerCase();if(fRes&&c.residence!==fRes)return false;if(fFrom&&new Date(c.completed_at)<new Date(fFrom))return false;if(fTo&&new Date(c.completed_at)>new Date(fTo))return false;if(fSearch&&!c.dsp_name.toLowerCase().includes(fSearch))return false;return true;});const tbody=document.getElementById('cert-body');if(!tbody)return;tbody.innerHTML='';filtered.forEach(c=>{const tr=document.createElement('tr');tr.innerHTML=`<td><input type="checkbox" class="cert-check" data-id="${c.id}" onchange="toggleCertSelection(false)"/></td><td>${fd(c.completed_at)}</td><td>${c.residence||'—'}</td><td>${c.individual_name||'—'}</td><td>${c.dsp_name}</td><td>${c.dsp_title||'—'}</td><td>${c.score}/5</td><td><span class="badge ${c.passed?'badge-pass':'badge-fail'}">${c.passed?'✅ Pass':'❌ Fail'}</span></td><td><button class="btn btn-primary btn-sm" onclick="viewCert('${c.id}',false)">View</button> <button class="btn btn-danger btn-sm" onclick="deleteCert('${c.id}')">Delete</button></td>`;tbody.appendChild(tr);});const sa=document.getElementById('nurse-select-all');if(sa)sa.checked=false;selectedCerts=[];updatePrintButton(false);if(window.tcSetCerts)window.tcSetCerts(certs);}
+function filterCerts(){renderCerts();}
+
+/* ===== ADMIN DASHBOARD ===== */
+async function loadAdmin(){if(!currentAdminUser)return;const{data,error}=await sb.from('certificates').select('*').order('completed_at',{ascending:false});if(error){console.error(error);return;}aCerts=data||[];renderACerts();const resSet=new Set(aCerts.map(c=>c.residence).filter(Boolean));const sel=document.getElementById('af-res');sel.innerHTML='<option value="">All</option>';resSet.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;sel.appendChild(o);});const total=aCerts.length;const passed=aCerts.filter(c=>c.passed).length;const failed=aCerts.filter(c=>!c.passed).length;const today=aCerts.filter(c=>new Date(c.completed_at).toDateString()===new Date().toDateString()).length;document.getElementById('a-total').textContent=total;document.getElementById('a-pass').textContent=passed;document.getElementById('a-fail').textContent=failed;document.getElementById('a-today').textContent=today;}
+function renderACerts(){const filtered=aCerts.filter(c=>{const fRes=document.getElementById('af-res').value;const fFrom=document.getElementById('af-from').value;const fTo=document.getElementById('af-to').value;const fSearch=document.getElementById('af-search').value.trim().toLowerCase();if(fRes&&c.residence!==fRes)return false;if(fFrom&&new Date(c.completed_at)<new Date(fFrom))return false;if(fTo&&new Date(c.completed_at)>new Date(fTo))return false;if(fSearch&&!c.dsp_name.toLowerCase().includes(fSearch))return false;return true;});const tbody=document.getElementById('admin-cert-body');tbody.innerHTML='';filtered.forEach(c=>{const tr=document.createElement('tr');tr.innerHTML=`<td><input type="checkbox" class="cert-check" data-id="${c.id}" onchange="toggleCertSelection(true)"/></td><td>${fd(c.completed_at)}</td><td>${c.nurse_email}</td><td>${c.residence||'—'}</td><td>${c.individual_name||'—'}</td><td>${c.dsp_name}</td><td>${c.dsp_title||'—'}</td><td>${c.score}/5</td><td><span class="badge ${c.passed?'badge-pass':'badge-fail'}">${c.passed?'✅ Pass':'❌ Fail'}</span></td><td><button class="btn btn-primary btn-sm" onclick="viewCert('${c.id}',true)">View</button> <button class="btn btn-danger btn-sm" onclick="deleteCert('${c.id}')">Delete</button></td>`;tbody.appendChild(tr);});document.getElementById('admin-select-all').checked=false;selectedAdminCerts=[];updatePrintButton(true);if(window.setupDeleteButtons){window.setupDeleteButtons();}if(window.updateAdminCounts){window.updateAdminCounts();}}
+function filterACerts(){renderACerts();}
+function fd(d){if(!d)return'—';const dt=new Date(d);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function viewCert(id,isAdmin){const source=isAdmin?aCerts:certs;const c=source.find(x=>x.id===id);if(!c)return;const content=document.getElementById('cert-content');content.innerHTML=`<div class="cert-box"><div style="font-size:2rem;margin-bottom:8px">🏆</div><div class="cert-title">Certificate of Completion</div><div class="cert-org">HASC Center — PON Training Program</div><p style="margin-bottom:8px;color:#374151">This certifies that</p><div class="cert-name">${c.dsp_name}</div><div class="cert-detail">Role: <strong>${c.dsp_title||'—'}</strong></div>${isAdmin?'<div class="cert-detail">Nurse: <strong>'+c.nurse_email+'</strong></div>':''}<div class="cert-detail">Residence: <strong>${c.residence||'—'}</strong></div><div class="cert-detail">Individual: <strong>${c.individual_name||'—'}</strong></div><div class="cert-score">Score: ${c.score}/5 (${Math.round((c.score/5)*100)}%)</div><div class="cert-detail" style="margin-top:8px;color:#9ca3af;font-size:0.8rem">Completed: ${fd(c.completed_at)}</div><div class="badge ${c.passed?'badge-pass':'badge-fail'}">${c.passed?'✅ PASSED':'❌ FAILED'}</div></div>`;document.getElementById('cert-modal').classList.add('open');}
+function closeCert(){document.getElementById('cert-modal').classList.remove('open');}
+
+async function deleteCert(id) {
+  if (!confirm('Are you sure you want to delete this certificate? This action cannot be undone.')) return;
+  try {
+    const { error } = await sb.from('certificates').delete().eq('id', id);
+    if (error) throw error;
+    const adminPortalVisible = document.getElementById('admin-portal').style.display !== 'none';
+    const adminDashVisible = document.getElementById('admin-dash-tab') && document.getElementById('admin-dash-tab').style.display !== 'none';
+    if (adminPortalVisible && adminDashVisible) { await loadAdmin(); } else { await loadCerts(); }
+    alert('Certificate deleted successfully.');
+  } catch (e) { alert('Failed to delete: ' + e.message); }
+}
+
+function toggleSelectAll(isAdmin){const checkboxes=document.querySelectorAll(isAdmin?'#admin-cert-table .cert-check':'#cert-table .cert-check');const selectAll=document.getElementById(isAdmin?'admin-select-all':'nurse-select-all');checkboxes.forEach(cb=>cb.checked=selectAll.checked);toggleCertSelection(isAdmin);}
+function toggleCertSelection(isAdmin){const checkboxes=document.querySelectorAll(isAdmin?'#admin-cert-table .cert-check':'#cert-table .cert-check');const selected=Array.from(checkboxes).filter(cb=>cb.checked).map(cb=>cb.dataset.id);if(isAdmin){selectedAdminCerts=selected;}else{selectedCerts=selected;}updatePrintButton(isAdmin);}
+function updatePrintButton(isAdmin){const btn=document.getElementById(isAdmin?'admin-print-sel-btn':'nurse-print-sel-btn');const selected=isAdmin?selectedAdminCerts:selectedCerts;if(btn){if(selected.length>0){btn.style.display='inline-flex';}else{btn.style.display='none';}}}
+function printSelected(isAdmin){const selected=isAdmin?selectedAdminCerts:selectedCerts;const source=isAdmin?aCerts:certs;if(selected.length===0){alert('Please select at least one certificate to print.');return;}const certsToP=source.filter(c=>selected.includes(c.id));const printWindow=window.open('','_blank');printWindow.document.write(`<!DOCTYPE html><html><head><title>HASC Certificates</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Segoe UI',Arial,sans-serif}@page{size:portrait;margin:0.5in}.cert-box{page-break-after:always;page-break-inside:avoid;background:linear-gradient(135deg,#f0f9ff,#e0f7fa);border:3px solid #00b4a0;border-radius:16px;padding:40px;text-align:center;max-width:7.5in;margin:0 auto 0.5in}.cert-box:last-child{page-break-after:auto}.cert-title{font-size:1.6rem;font-weight:800;color:#00b4a0;margin-bottom:4px}.cert-org{font-size:0.9rem;color:#6b7280;margin-bottom:16px}.cert-name{font-size:1.5rem;font-weight:800;color:#1a202c;border-bottom:2px solid #00b4a0;padding-bottom:8px;margin-bottom:12px}.cert-detail{font-size:0.92rem;color:#374151;margin-bottom:4px}.cert-score{font-size:1.1rem;font-weight:700;color:#00b4a0;margin-top:10px}.badge{display:inline-block;padding:8px 20px;font-size:0.92rem;font-weight:700;border-radius:8px;margin-top:16px}.badge-pass{background:#d1fae5;color:#065f46}.badge-fail{background:#fee2e2;color:#991b1b}</style></head><body>${certsToP.map(c=>`<div class="cert-box"><div style="font-size:2rem;margin-bottom:8px">🏆</div><div class="cert-title">Certificate of Completion</div><div class="cert-org">HASC Center — PON Training Program</div><p style="margin-bottom:8px;color:#374151">This certifies that</p><div class="cert-name">${c.dsp_name}</div><div class="cert-detail">Role: <strong>${c.dsp_title||'—'}</strong></div>${isAdmin?'<div class="cert-detail">Nurse: <strong>'+c.nurse_email+'</strong></div>':''}<div class="cert-detail">Residence: <strong>${c.residence||'—'}</strong></div><div class="cert-detail">Individual: <strong>${c.individual_name||'—'}</strong></div><div class="cert-score">Score: ${c.score}/5 (${Math.round((c.score/5)*100)}%)</div><div class="cert-detail" style="margin-top:8px;color:#9ca3af;font-size:0.8rem">Completed: ${fd(c.completed_at)}</div><div class="badge ${c.passed?'badge-pass':'badge-fail'}">${c.passed?'✅ PASSED':'❌ FAILED'}</div></div>`).join('')}</body></html>`);printWindow.document.close();setTimeout(()=>{printWindow.print();},250);}
+
+/* ===== STAFF MANAGEMENT ===== */
+async function loadNurseList(){const list=document.getElementById('nurse-list');const count=document.getElementById('nurse-count');const{data}=await sb.from('nurse_staff').select('*').order('name');count.textContent=data?data.length:0;list.innerHTML='';(data||[]).forEach(n=>{const card=document.createElement('div');card.className='user-card';card.innerHTML=`<div class="uinfo"><div class="uname">${n.name}</div><div class="uemail">${n.email}</div></div><div class="uactions"><span class="pin-display">PIN: ${n.pin}</span><div class="action-btn-group"><button class="btn-deactivate" onclick="deactivatePin('${n.email}','${n.name}')">🔒 Deactivate PIN</button><button class="btn-remove" onclick="deleteNurse('${n.email}','${n.name}')">🗑 Delete</button></div></div>`;list.appendChild(card);});}
+async function deleteNurse(id,name){if(!confirm('Delete nurse '+name+'? This cannot be undone.'))return;try{const{error}=await sb.from('nurse_staff').delete().eq('email',id);if(error)throw error;alert(name+' has been deleted.');await loadNurseList();}catch(e){alert('Error deleting nurse: '+e.message);}}
+async function deactivatePin(id,name){if(!confirm('Deactivate PIN for '+name+'? They will not be able to log in until a new PIN is assigned.'))return;try{const{error}=await sb.from('nurse_staff').update({active:false}).eq('email',id);if(error)throw error;alert('PIN for '+name+' has been deactivated.');await loadNurseList();}catch(e){alert('Error deactivating PIN: '+e.message);}}
+
+/* ===== ADMIN MANAGEMENT ===== */
+async function loadAdminList(){const li=document.getElementById('admin-list');const co=document.getElementById('admin-count');if(!li)return;li.innerHTML='<p style="color:#9ca3af;padding:16px;">Loading...</p>';const{data,error}=await sb.from('admin_accounts').select('id,name,email,username,role,active,created_at').order('created_at',{ascending:true});if(error){li.innerHTML='<div class="alert alert-error">Error: '+error.message+'</div>';return;}if(co)co.textContent=data?data.length:0;if(!data||data.length===0){li.innerHTML='<p style="color:#9ca3af;padding:16px;">No admin accounts found.</p>';return;}li.innerHTML=data.map(a=>{const ow=a.email==='mshilcrat@hasccenter.org';return'<div class="user-card"><div class="uinfo"><strong>'+(a.name||a.username)+'</strong><span class="uemail">'+a.email+'</span><span style="font-size:0.8rem;color:#6b7280;">@'+(a.username||'')+' · '+(a.role||'admin')+' · '+(a.active?'✅ Active':'⛔ Inactive')+'</span></div><div class="uactions">'+(!ow?'<button class="btn-danger-sm" onclick="delAdmin(\''+a.id+'\',\''+((a.name||a.username).replace(/\'/g,"\\'"))+'\')">🗑 Delete</button>':'<span style=\"color:#9ca3af\">Owner</span>')+'</div></div>';}).join('');}
+async function addNurse(){const al=document.getElementById('add-nurse-alert');const nm=(document.getElementById('new-name').value||'').trim();const em=(document.getElementById('new-email').value||'').trim().toLowerCase();const pn=[...document.querySelectorAll('#new-pin-group .new-pin')].map(i=>i.value).join('');if(!nm||!em||pn.length!==4){al.innerHTML='<div class="alert alert-error">Please fill all fields and enter a 4-digit PIN.</div>';return;}async function sha(x){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(x));return Array.from(new Uint8Array(b)).map(b=>b.toString(16).padStart(2,'0')).join('');}const[eh,cb]=await Promise.all([sha(em),sha(em+pn)]);const{error}=await sb.from('nurse_staff').insert({name:nm,email:em,pin:pn,email_hash:eh,combined:cb,active:true});if(error){al.innerHTML='<div class="alert alert-error">Error: '+error.message+'</div>';return;}al.innerHTML='<div class="alert alert-success">✅ Nurse added successfully!</div>';document.getElementById('new-name').value='';document.getElementById('new-email').value='';document.querySelectorAll('#new-pin-group .new-pin').forEach(i=>i.value='');NURSES.push({email:em,name:nm,pin:pn});await loadNurseList();}
+async function addAdmin(){const al=document.getElementById('add-admin-alert');const un=(document.getElementById('new-admin-user').value||'').trim().toLowerCase();const em=(document.getElementById('new-admin-email').value||'').trim().toLowerCase();const pn=[...document.querySelectorAll('#new-admin-pin-group .admin-new-pin')].map(i=>i.value).join('');if(!un||!em||pn.length!==4){al.innerHTML='<div class="alert alert-error">Please fill all fields and enter a 4-digit PIN.</div>';return;}async function sha(x){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(x));return Array.from(new Uint8Array(b)).map(b=>b.toString(16).padStart(2,'0')).join('');}const[eh,cb]=await Promise.all([sha(em),sha(em+pn)]);const{error}=await sb.from('admin_accounts').insert({name:un,username:un,email:em,pin:pn,email_hash:eh,combined:cb,role:'admin',active:true});if(error){al.innerHTML='<div class="alert alert-error">Error: '+error.message+'</div>';return;}al.innerHTML='<div class="alert alert-success">✅ Admin account created! PIN: <strong>'+pn+'</strong></div>';document.getElementById('new-admin-user').value='';document.getElementById('new-admin-email').value='';document.querySelectorAll('#new-admin-pin-group .admin-new-pin').forEach(i=>i.value='');loadAdminList();}
+async function delAdmin(id,nm){if(!confirm('Delete admin "'+nm+'"?'))return;const{error}=await sb.from('admin_accounts').delete().eq('id',id);if(error){alert('Error: '+error.message);return;}loadAdminList();}
+
+/* ===== QUESTIONS INBOX ===== */
+const _origSwitchNurseTab=switchNurseTab;
+switchNurseTab=function(t){const q=document.getElementById('nurse-questions-tab');const b=document.getElementById('tab-questions');if(t==='questions'){document.getElementById('nurse-setup-tab').style.display='none';document.getElementById('nurse-dash-tab').style.display='none';if(q)q.style.display='block';document.querySelectorAll('.tabs .tab-btn').forEach(x=>x.classList.remove('active'));if(b)b.classList.add('active');loadDSPQuestions();}else{if(q)q.style.display='none';if(b)b.classList.remove('active');_origSwitchNurseTab(t);}}
+const DEMO_QUESTIONS=[
+  {id:'demo-1',dsp_name:'Rodriguez, Carlos',callback_phone:'(718) 555-1234',residence:'PON Training',questions:'Can we use gloves for this procedure?',created_at:'2026-05-15T10:30:00Z'},
+  {id:'demo-2',dsp_name:'Williams, Sarah',callback_phone:'(718) 555-5678',residence:'PON Training',questions:"What's the emergency contact protocol?",created_at:'2026-05-09T14:15:00Z'},
+  {id:'demo-3',dsp_name:'Martinez, Robert',callback_phone:'(718) 555-9012',residence:'PON Training',questions:'How often should we check the insertion site?',created_at:'2026-04-28T09:00:00Z'}
+];
+async function loadDSPQuestions(){
+  const l=document.getElementById('q-inbox-list');const bg=document.getElementById('q-badge');const ct=document.getElementById('q-inbox-count');
+  if(!l)return;
+  l.innerHTML='<div style="text-align:center;padding:30px;color:#9ca3af;background:#fff;border-radius:12px;border:1px solid #f1f5f9;">Loading...</div>';
+  const{data,error}=await sb.from('dsp_questions').select('*').eq('resolved',false).order('created_at',{ascending:false});
+  let questions=data||[];
+  let isDemo=false;
+  // Fall back to demo data when Supabase has zero real questions (so the display can be verified)
+  if(!error&&questions.length===0){questions=DEMO_QUESTIONS;isDemo=true;}
+  if(error&&questions.length===0){l.innerHTML='<div class="alert alert-error">Error: '+error.message+'</div>';return;}
+  const n=isDemo?0:questions.length;
+  if(bg){bg.textContent=n;bg.style.display=n>0?'inline-block':'none';}
+  if(ct)ct.textContent=isDemo?'(demo data — no real questions yet)':(n>0?'('+n+' pending)':'(all resolved)');
+  const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const demoBanner=isDemo?'<div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#92400e;display:flex;align-items:center;gap:8px;"><span style="font-size:14px;">⚠️</span><div><strong>Demo data shown.</strong> When real DSP questions arrive from training quizzes, they replace these.</div></div>':'';
+  l.innerHTML=demoBanner+questions.map(q=>{
+    const dt=new Date(q.created_at);
+    const dateStr=dt.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    const trainingName=esc(q.training_name||q.residence||'PON Training');
+    return `<div id="qi-${q.id}" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px 20px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.03);">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+  <div style="flex:1;min-width:0;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:#1a202c;"><span style="color:#7c3aed;font-size:14px;">👤</span>${esc(q.dsp_name||'Unknown DSP')}</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;color:#4b5563;"><span style="color:#ec4899;">📞</span>${esc(q.callback_phone||'No number provided')}</div>
+    <div style="font-size:12px;color:#6b7280;margin-top:4px;">${dateStr}</div>
+  </div>
+  <span style="background:#fef3c7;color:#92400e;padding:3px 12px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;">Pending</span>
+</div>
+<div style="margin-top:14px;font-size:14px;color:#1a202c;font-style:italic;line-height:1.5;">"${esc(q.questions||'').replace(/\n/g,'<br>')}"</div>
+<div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+  <button onclick="resolveQuestion('${q.id}')" style="background:#2563eb;color:#fff;border:none;padding:7px 14px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;">✓ Mark as Answered</button>
+  <button onclick="archiveQuestion('${q.id}')" style="background:#fff;color:#374151;border:1px solid #d1d5db;padding:7px 14px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;">📦 Archive</button>
+  <button onclick="deleteQuestion('${q.id}')" style="background:#fff;color:#dc2626;border:1px solid #d1d5db;padding:7px 14px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;">🗑 Delete</button>
+</div>
+</div>`;
+  }).join('');
+}
+async function resolveQuestion(id){
+  if(String(id).startsWith('demo-')){
+    const idx=DEMO_QUESTIONS.findIndex(q=>q.id===id);
+    if(idx>=0)DEMO_QUESTIONS.splice(idx,1);
+    loadDSPQuestions();
+    return;
+  }
+  const{error}=await sb.from('dsp_questions').update({resolved:true}).eq('id',id);
+  if(error){alert('Error: '+error.message);return;}
+  loadDSPQuestions();
+}
+async function archiveQuestion(id){
+  if(String(id).startsWith('demo-')){
+    const idx=DEMO_QUESTIONS.findIndex(q=>q.id===id);
+    if(idx>=0)DEMO_QUESTIONS.splice(idx,1);
+    loadDSPQuestions();
+    return;
+  }
+  const{error}=await sb.from('dsp_questions').update({resolved:true}).eq('id',id);
+  if(error){alert('Error: '+error.message);return;}
+  loadDSPQuestions();
+}
+async function deleteQuestion(id){
+  if(!confirm('Permanently delete this question? This cannot be undone.'))return;
+  if(String(id).startsWith('demo-')){
+    const idx=DEMO_QUESTIONS.findIndex(q=>q.id===id);
+    if(idx>=0)DEMO_QUESTIONS.splice(idx,1);
+    loadDSPQuestions();
+    return;
+  }
+  const{error}=await sb.from('dsp_questions').delete().eq('id',id);
+  if(error){alert('Error: '+error.message);return;}
+  loadDSPQuestions();
+}
+
+/* Login hook to refresh question badge after login */
+const _nl=nurseLogin;nurseLogin=async function(){await _nl();setTimeout(async()=>{const m=document.getElementById('nurse-main');if(m&&m.style.display!=='none'){const{data}=await sb.from('dsp_questions').select('id').eq('resolved',false);const bg=document.getElementById('q-badge');if(bg&&data){bg.textContent=data.length;bg.style.display=data.length>0?'inline-block':'none';}}},600);};
+
+/* DOM ready */
+document.addEventListener('DOMContentLoaded',()=>{document.getElementById('homepage').style.display='block';});
+</script>
+
+<!-- ====================================================================== -->
+<!-- ===== SCRIPTS: NEW DASHBOARD (TRAININGS TRACKER) ===================== -->
+<!-- ====================================================================== -->
+<!-- Self-contained dashboard for Outstanding / Completed / Training Links / Folders.
+     Currently runs on in-memory sample data + can ingest from Supabase certificates
+     via window.tcSetCerts(certsArray). Wire to real training-assignment table
+     when the schema is ready. -->
+<script>
+(function(){
+const SAMPLE_ITEMS=[];
+
+let items=SAMPLE_ITEMS.slice();
+const state={tab:'completed',loc:'all',type:'all',ind:'all',group:'location',activeFolder:null,renamingFolder:null,confirmDel:null,confirmDeleteItem:null,selectedItems:new Set()};
+let folders=[{id:'f1',name:'Audit Q2 2026'},{id:'f2',name:'Simon Klar - active'}];
+const itemFolder={};
+let nextId=100;
+const LINK_TTL_DAYS=10;
+const LINK_STORAGE_KEY='hasc_training_links_v1';
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const folderNameFor=id=>{const fid=itemFolder[id];if(!fid)return '';const f=folders.find(x=>x.id===fid);return f?f.name:'';};
+const wrapper=()=>$('tc-wrapper');
+const locs=()=>[...new Set(items.map(i=>i.loc))].sort();
+const inds=()=>[...new Set(items.filter(i=>i.ind).map(i=>i.ind))].sort();
+
+/* Hook for legacy code: pulls real cert data from Supabase certificates table
+   into the new dashboard. Called automatically after loadCerts() runs (after login). */
+window.tcSetCerts=function(certs){
+  if(!Array.isArray(certs))return;
+  // Remove old cert items, keep non-cert items (e.g., future imports)
+  items=items.filter(i=>!String(i.id).startsWith('c'));
+  certs.forEach(c=>{
+    // NOTE: certificates table has no training_name field. Using individual_name as
+    // a proxy so each row is distinct. Real fix: add training_name to training_sessions
+    // + carry it through to certificates on quiz completion.
+    const label=c.individual_name?(c.individual_name+' — training'):'General training';
+    items.push({
+      id:'c'+c.id,
+      loc:c.residence||'(unknown)',
+      staff:c.dsp_name||'(unknown)',
+      training:label,
+      type:'PONS',
+      ind:c.individual_name||null,
+      status:'complete',
+      score:c.score,
+      passed:c.passed,
+      completedAt:c.completed_at
+    });
+  });
+  render();
+};
+
+function refreshFilters(){
+  const fl=$('tc-f-loc');if(!fl)return;
+  const curLoc=fl.value||'all';
+  fl.innerHTML='<option value="all">All residences</option>'+locs().map(l=>`<option value="${esc(l)}" ${l===curLoc?'selected':''}>${esc(l)}</option>`).join('');
+}
+
+function getFiltered(){
+  const tabFilter=i=>state.tab==='outstanding'?i.status==='incomplete':state.tab==='completed'?i.status==='complete':false;
+  return items.filter(i=>tabFilter(i)&&!itemFolder[i.id]&&(state.loc==='all'||i.loc===state.loc)&&(state.type==='all'||i.type===state.type));
+}
+function getExportData(){
+  if(state.tab==='folders'&&state.activeFolder)return{title:'Folder: '+folders.find(x=>x.id===state.activeFolder).name,rows:items.filter(i=>itemFolder[i.id]===state.activeFolder)};
+  if(state.tab==='outstanding'||state.tab==='completed')return{title:state.tab==='outstanding'?'Outstanding trainings':'Completed trainings',rows:getFiltered()};
+  return{title:'All trainings',rows:items};
+}
+
+function statusPill(i){
+  if(i.status==='incomplete')return '<span class="tc-pill tc-pill-incomplete">Incomplete</span>';
+  if(i.passed)return '<span class="tc-pill tc-pill-pass">✓ Pass</span>';
+  if(i.passed===false)return '<span class="tc-pill tc-pill-fail">✗ Fail</span>';
+  return '<span class="tc-pill tc-pill-complete">Complete</span>';
+}
+function fmtDate(d){if(!d)return'—';const dt=new Date(d);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function typePill(t){const cls={'Site':'tc-pill-site','PONS':'tc-pill-pons','Org-wide':'tc-pill-orgwide'}[t]||'tc-pill-orgwide';return `<span class="tc-pill ${cls}">${esc(t)}</span>`;}
+function folderButton(i){
+  const fid=itemFolder[i.id];const f=fid?folders.find(x=>x.id===fid):null;
+  if(f)return `<button class="tc-folder-btn assigned" onclick="tcOpenPopover(event,'${i.id}')" title="${esc(f.name)}"><span style="flex-shrink:0;">📁</span><span>${esc(f.name)}</span></button>`;
+  return `<button class="tc-folder-btn" onclick="tcOpenPopover(event,'${i.id}')" title="Move to folder"><span style="flex-shrink:0;">+</span><span>Folder</span></button>`;
+}
+function actionCell(i){
+  if(state.confirmDeleteItem===i.id){
+    return `<div class="tc-confirm-del" style="justify-content:flex-end;">
+<span style="font-size:11px;color:#64748b;">Delete?</span>
+<button class="tc-confirm-btn" onclick="tcConfirmDeleteItem('${i.id}')">Yes</button>
+<button class="tc-cancel-btn" onclick="tcCancelDeleteItem()">No</button>
+</div>`;
+  }
+  const main=i.status==='complete'
+    ?`<button class="btn btn-secondary btn-sm" onclick="tcView('${i.id}')">View</button>`
+    :'';
+  return `<div style="display:flex;gap:4px;justify-content:flex-end;">${main}<button class="btn btn-secondary btn-sm" onclick="tcAskDeleteItem('${i.id}')" title="Delete training" style="padding:5px 7px;">🗑</button></div>`;
+}
+
+function renderRows(list){
+  const isCompleted=state.tab==='completed';
+  const colCount=isCompleted?10:8;
+  // ----- Auto-size the Training file column based on the longest visible name -----
+  let maxLen='Training file'.length; // header label as floor
+  list.forEach(i=>{const len=(i.training||'').length;if(len>maxLen)maxLen=len;});
+  // Heuristic: ~0.65% per character + ~4% for padding/icon; clamped so we don't crush other cols
+  let trainingPct=maxLen*0.65+4;
+  trainingPct=Math.max(11,Math.min(28,trainingPct));
+  // Recompute other column percentages so total stays 100
+  let widths;
+  if(isCompleted){
+    const defaults=[5,11,10,14,7,7,10,11,13,12]; // sum=100, training at index 3
+    const scale=(100-trainingPct)/86;
+    widths=defaults.map((w,idx)=>idx===3?trainingPct:w*scale);
+  }else{
+    const defaults=[5,16,12,15,10,11,18,13]; // sum=100, training at index 3
+    const scale=(100-trainingPct)/85;
+    widths=defaults.map((w,idx)=>idx===3?trainingPct:w*scale);
+  }
+  const colgroupHtml='<colgroup>'+widths.map(w=>`<col style="width:${w.toFixed(2)}%">`).join('')+'</colgroup>';
+  // -------------------------------------------------------------------------------
+  // Bulk action bar appears above table when items are selected
+  let bulkBar='';
+  if(state.selectedItems.size>0){
+    bulkBar=`<div style="background:#e6faf8;border:1px solid #00b4a0;border-radius:8px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+<span style="font-size:13px;font-weight:600;color:#065f46;">✓ ${state.selectedItems.size} selected</span>
+<button class="btn btn-primary btn-sm" onclick="tcOpenBulkMovePopover(event)">📁 Move to folder...</button>
+<button class="btn btn-secondary btn-sm" onclick="tcClearSelection()" style="margin-left:auto;">Clear selection</button>
+</div>`;
+  }
+  let html=bulkBar+'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;table-layout:fixed;">'+colgroupHtml;
+  // Determine if all visible items are selected (for header checkbox state)
+  const allSelected=list.length>0&&list.every(i=>state.selectedItems.has(i.id));
+  const someSelected=list.some(i=>state.selectedItems.has(i.id));
+  const headerCheck=`<input type="checkbox" ${allSelected?'checked':''} ${(someSelected&&!allSelected)?'class="tc-indeterminate"':''} onchange="tcToggleSelectAll()" title="Select all visible" style="cursor:pointer;">`;
+  if(isCompleted){
+    html+='<thead><tr>';
+    html+=`<th class="tc-th" style="text-align:center;">${headerCheck}</th><th class="tc-th tc-col-1">Residence</th><th class="tc-th tc-col-2">Staff</th><th class="tc-th tc-col-3">Training file</th><th class="tc-th tc-col-4">Type</th><th class="tc-th tc-col-5">Score</th><th class="tc-th tc-col-6">Status</th><th class="tc-th tc-col-7">Date</th><th class="tc-th tc-col-8">Folder</th><th class="tc-th"></th>`;
+  }else{
+    html+='<thead><tr>';
+    html+=`<th class="tc-th" style="text-align:center;">${headerCheck}</th><th class="tc-th tc-col-1">Residence</th><th class="tc-th tc-col-2">Staff</th><th class="tc-th tc-col-3">Training file</th><th class="tc-th tc-col-4">Type</th><th class="tc-th tc-col-6">Status</th><th class="tc-th tc-col-8">Folder</th><th class="tc-th"></th>`;
+  }
+  html+='</tr></thead><tbody>';
+  if(list.length===0){
+    const allFiled=items.filter(i=>state.tab==='outstanding'?i.status==='incomplete':i.status==='complete').every(i=>itemFolder[i.id]);
+    const msg=allFiled&&items.length>0?'Everything in this view has been filed away. Check the Folders tab.':'No items match these filters.';
+    html+=`<tr><td colspan="${colCount}" class="tc-empty">${msg}</td></tr></tbody></table></div>`;return html;
+  }
+  if(state.group==='none'){list.forEach(i=>{html+=renderRow(i);});}
+  else{
+    const groups={};
+    const keyFn={location:i=>i.loc,training:i=>i.training,individual:i=>i.ind||'(No individual)',staff:i=>i.staff}[state.group];
+    list.forEach(i=>{const k=keyFn(i);(groups[k]=groups[k]||[]).push(i);});
+    Object.keys(groups).sort().forEach(k=>{
+      html+=`<tr><td colspan="${colCount}" class="tc-group-hdr">${esc(k)} <span style="color:#94a3b8;font-weight:400;margin-left:4px;">${groups[k].length}</span></td></tr>`;
+      groups[k].forEach(i=>{html+=renderRow(i);});
+    });
+  }
+  html+='</tbody></table></div>';return html;
+}
+function renderRow(i){
+  const isCompleted=state.tab==='completed';
+  const indSub=i.ind?`<div style="font-size:10px;color:#64748b;margin-top:2px;margin-left:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">for ${esc(i.ind)}</div>`:'';
+  const scoreCell=isCompleted?`<td class="tc-td tc-col-5" style="font-weight:700;color:${i.passed===false?'#991b1b':'#1a202c'};white-space:nowrap;">${i.score!=null?i.score+'/5':'—'}</td>`:'';
+  const dateCell=isCompleted?`<td class="tc-td tc-col-7" style="font-size:11px;color:#64748b;white-space:nowrap;">${i.completedAt?fmtDate(i.completedAt):'—'}</td>`:'';
+  const checked=state.selectedItems.has(i.id);
+  const rowBg=checked?'background:#e6faf8;':'';
+  return `<tr class="tc-row" data-item="${i.id}" style="${rowBg}">
+<td class="tc-td" style="text-align:center;"><input type="checkbox" ${checked?'checked':''} onchange="tcToggleSelect('${i.id}')" style="cursor:pointer;"></td>
+<td class="tc-td tc-col-1" style="white-space:nowrap;text-overflow:ellipsis;">${esc(i.loc)}</td>
+<td class="tc-td tc-col-2" style="white-space:nowrap;text-overflow:ellipsis;">${esc(i.staff)}</td>
+<td class="tc-td tc-col-3"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span class="tc-file-icon">📄</span>${esc(i.training)}</div>${indSub}</td>
+<td class="tc-td tc-col-4">${typePill(i.type)}</td>
+${scoreCell}
+<td class="tc-td tc-col-6">${statusPill(i)}</td>
+${dateCell}
+<td class="tc-td tc-col-8">${folderButton(i)}</td>
+<td class="tc-td">${actionCell(i)}</td>
+</tr>`;
+}
+
+function loadLinks(){
+  let raw=[];
+  try{raw=JSON.parse(localStorage.getItem(LINK_STORAGE_KEY)||'[]');}catch(e){raw=[];}
+  // Filter out anything older than LINK_TTL_DAYS
+  const cutoff=Date.now()-(LINK_TTL_DAYS*24*60*60*1000);
+  const fresh=raw.filter(l=>{const t=new Date(l.created_at).getTime();return t>=cutoff;});
+  if(fresh.length!==raw.length){saveLinks(fresh);} // silently purge expired
+  return fresh;
+}
+function saveLinks(links){try{localStorage.setItem(LINK_STORAGE_KEY,JSON.stringify(links));}catch(e){toast('Could not save — storage full');}}
+function daysLeft(createdAt){
+  const elapsedMs=Date.now()-new Date(createdAt).getTime();
+  const left=LINK_TTL_DAYS-(elapsedMs/(24*60*60*1000));
+  return Math.max(0,Math.ceil(left));
+}
+function daysLeftPill(d){
+  let bg='#d1fae5',c='#065f46';
+  if(d<=1){bg='#fee2e2';c='#991b1b';}
+  else if(d<=5){bg='#fef3c7';c='#92400e';}
+  return `<span style="background:${bg};color:${c};padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600;">${d} day${d===1?'':'s'} left</span>`;
+}
+function fmtAgo(d){
+  const ms=Date.now()-new Date(d).getTime();
+  const mins=Math.floor(ms/60000);
+  if(mins<1)return'just now';
+  if(mins<60)return mins+' min ago';
+  const hrs=Math.floor(mins/60);
+  if(hrs<24)return hrs+' hr ago';
+  const days=Math.floor(hrs/24);
+  if(days===1)return 'yesterday';
+  return days+' days ago';
+}
+
+function renderLinks(){
+  $('tc-filters').style.display='none';$('tc-groupbar').style.display='none';
+  const links=loadLinks();
+  let listHtml='';
+  if(links.length===0){
+    listHtml=`<div class="tc-empty" style="padding:40px 20px;background:#fff;border:1px solid #f1f5f9;border-radius:10px;">No saved links yet. Add one above.</div>`;
+  }else{
+    listHtml=links.map(l=>{
+      const d=daysLeft(l.created_at);
+      const urlShort=l.url.length>70?l.url.slice(0,70)+'…':l.url;
+      return `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+<div style="flex:1;min-width:0;">
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+<span style="font-size:14px;font-weight:700;color:#1a202c;">📄 ${esc(l.name)}</span>
+${daysLeftPill(d)}
+</div>
+<div style="font-size:11px;color:#64748b;font-family:monospace;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(urlShort)}</div>
+<div style="font-size:10px;color:#94a3b8;margin-top:2px;">Added ${fmtAgo(l.created_at)}</div>
+</div>
+<div style="display:flex;gap:4px;flex-shrink:0;">
+<button class="btn btn-secondary btn-sm" onclick="tcCopyLink('${l.id}')" title="Copy URL to clipboard">📋 Copy</button>
+<button class="btn btn-secondary btn-sm" onclick="tcOpenLink('${l.id}')" title="Open in new tab">↗ Open</button>
+<button class="btn btn-secondary btn-sm" onclick="tcDeleteLink('${l.id}')" title="Delete link" style="padding:5px 7px;">🗑</button>
+</div>
+</div>`;
+    }).join('');
+  }
+  $('tc-content').innerHTML=`
+<div style="padding:14px 16px;">
+  <div style="margin-bottom:14px;">
+    <p style="font-size:14px;font-weight:600;margin:0 0 4px;">Training Links Library</p>
+    <p style="font-size:12px;color:#64748b;margin:0;">Saved training links so RMs can grab them without hunting. Links auto-delete after ${LINK_TTL_DAYS} days.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1.5fr auto;gap:8px;padding:12px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:14px;align-items:end;">
+    <div><label class="tc-mini-label">Name this training</label><input id="tc-new-link-name" type="text" class="tc-inline-input" placeholder="e.g. Fire safety annual" onkeydown="if(event.key==='Enter')tcAddLink()"></div>
+    <div><label class="tc-mini-label">Training URL</label><input id="tc-new-link-url" type="text" class="tc-inline-input url" placeholder="https://..." onkeydown="if(event.key==='Enter')tcAddLink()"></div>
+    <div><button class="btn btn-primary btn-sm" onclick="tcAddLink()">+ Add</button></div>
+  </div>
+  <div>${listHtml}</div>
+  <div style="margin-top:14px;font-size:11px;color:#94a3b8;">${links.length} saved · stored on this browser</div>
+</div>`;
+  $('tc-count').textContent='';
+}
+
+function renderFolders(){
+  $('tc-filters').style.display='none';$('tc-groupbar').style.display='none';
+  const folderItems=state.activeFolder?items.filter(i=>itemFolder[i.id]===state.activeFolder):null;
+  let html='<div style="padding:14px 16px;">';
+  html+='<div style="display:flex;gap:8px;margin-bottom:14px;">';
+  html+='<input id="tc-new-folder" type="text" placeholder="New folder name..." style="flex:1;font-size:13px;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;" onkeydown="if(event.key===\'Enter\')tcCreateFolder()">';
+  html+='<button class="btn btn-primary btn-sm" onclick="tcCreateFolder()">📁 Create folder</button>';
+  html+='</div>';
+  if(folders.length===0){
+    html+='<div class="tc-empty" style="padding:30px 20px;">No folders yet. Create one above.</div>';
+  }else{
+    html+='<div style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Your folders</div>';
+    folders.forEach(f=>{
+      const count=Object.values(itemFolder).filter(v=>v===f.id).length;
+      const isActive=state.activeFolder===f.id;
+      const isRenaming=state.renamingFolder===f.id;
+      const isConfirmDel=state.confirmDel===f.id;
+      html+=`<div class="tc-folder-card" style="${isActive?'border-color:#00b4a0;background:#e6faf8;':''}">
+<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;${isRenaming?'':'cursor:pointer;'}" ${isRenaming?'':`onclick="tcOpenFolder('${f.id}')"`}>
+<span style="font-size:18px;flex-shrink:0;">📁</span>
+<div style="min-width:0;flex:1;">`;
+      if(isRenaming){
+        html+=`<input type="text" class="tc-inline-input" id="tc-rename-${f.id}" value="${esc(f.name)}" onkeydown="if(event.key==='Enter')tcCommitRename('${f.id}');if(event.key==='Escape')tcCancelRename()" onblur="tcCommitRename('${f.id}')" style="width:100%;">`;
+      }else{
+        html+=`<div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(f.name)}</div>
+<div style="font-size:11px;color:#64748b;">${count} file${count===1?'':'s'}</div>`;
+      }
+      html+=`</div></div>`;
+      if(isConfirmDel){
+        html+=`<div class="tc-confirm-del"><span style="font-size:11px;color:#64748b;">Delete?</span><button class="tc-confirm-btn" onclick="tcConfirmDelete('${f.id}')">Yes, delete</button><button class="tc-cancel-btn" onclick="tcCancelConfirmDel()">No</button></div>`;
+      }else{
+        html+=`<div style="display:flex;gap:4px;flex-shrink:0;">
+<button class="btn btn-secondary btn-sm" onclick="tcStartRename('${f.id}')" title="Rename">✏️</button>
+<button class="btn btn-secondary btn-sm" onclick="tcAskDelete('${f.id}')" title="Delete">🗑</button>
+</div>`;
+      }
+      html+=`</div>`;
+    });
+  }
+  if(folderItems){
+    const f=folders.find(x=>x.id===state.activeFolder);
+    html+=`<div style="margin-top:18px;padding-top:14px;border-top:1px solid #e5e7eb;">`;
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">`;
+    html+=`<div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">📂 ${esc(f.name)}</div>`;
+    html+=`<button class="btn btn-secondary btn-sm" onclick="tcOpenFolder(null)" style="flex-shrink:0;margin-left:8px;">Close</button>`;
+    html+=`</div>`;
+    if(folderItems.length===0){
+      html+='<div class="tc-empty" style="padding:20px;">Empty. Move training files here from Outstanding or Completed.</div>';
+    }else{
+      html+='<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;table-layout:fixed;">';
+      html+='<colgroup><col style="width:22%"><col style="width:18%"><col style="width:38%"><col style="width:22%"></colgroup>';
+      html+='<thead><tr><th class="tc-th">Residence</th><th class="tc-th">Staff</th><th class="tc-th">Training file</th><th class="tc-th"></th></tr></thead><tbody>';
+      folderItems.forEach(i=>{
+        const isConfirmDelItem=state.confirmDeleteItem===i.id;
+        html+=`<tr class="tc-row">
+<td class="tc-td" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(i.loc)}</td>
+<td class="tc-td" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(i.staff)}</td>
+<td class="tc-td"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span class="tc-file-icon">📄</span>${esc(i.training)}</div></td>
+<td class="tc-td" style="text-align:right;">`;
+        if(isConfirmDelItem){
+          html+=`<div class="tc-confirm-del" style="justify-content:flex-end;"><span style="font-size:11px;color:#64748b;">Delete?</span><button class="tc-confirm-btn" onclick="tcConfirmDeleteItem('${i.id}')">Yes</button><button class="tc-cancel-btn" onclick="tcCancelDeleteItem()">No</button></div>`;
+        }else{
+          html+=`<button class="btn btn-secondary btn-sm" onclick="tcRemoveFromFolder('${i.id}')">Remove from folder</button>
+<button class="btn btn-secondary btn-sm" onclick="tcAskDeleteItem('${i.id}')" title="Delete training" style="padding:5px 7px;">🗑</button>`;
+        }
+        html+=`</td>
+</tr>`;
+      });
+      html+='</tbody></table></div>';
+    }
+    html+='</div>';
+  }
+  html+='</div>';
+  $('tc-content').innerHTML=html;
+  $('tc-count').textContent='';
+  if(state.renamingFolder){const inp=$('tc-rename-'+state.renamingFolder);if(inp){inp.focus();inp.select();}}
+}
+
+function render(){
+  if(!$('tc-wrapper'))return;
+  $('tc-crumb').textContent={completed:'Completed',links:'Training Links',folders:'Folders'}[state.tab]||'Completed';
+  document.querySelectorAll('#tc-tabs .tc-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===state.tab));
+  closePopover();
+  if(state.tab==='links'){renderLinks();return;}
+  if(state.tab==='folders'){renderFolders();applyHiddenCols();return;}
+  $('tc-filters').style.display='grid';$('tc-groupbar').style.display='flex';
+  refreshFilters();
+  const list=getFiltered();
+  $('tc-content').innerHTML=renderRows(list);
+  const totalLocs=new Set(list.map(i=>i.loc)).size;
+  const filedCount=items.filter(i=>itemFolder[i.id]).length;
+  const filedNote=filedCount>0?` · ${filedCount} filed away`:'';
+  $('tc-count').textContent=`${list.length} file${list.length===1?'':'s'} · ${totalLocs} residence${totalLocs===1?'':'s'}${filedNote}`;
+  applyHiddenCols();
+}
+
+/* ===== HIDE / SHOW COLUMNS ===== */
+function loadHiddenCols(){
+  const key='hasc_hidden_cols_'+state.tab;
+  try{const arr=JSON.parse(localStorage.getItem(key)||'[]');return new Set(arr);}catch(e){return new Set();}
+}
+function saveHiddenCols(set){
+  const key='hasc_hidden_cols_'+state.tab;
+  try{localStorage.setItem(key,JSON.stringify(Array.from(set)));}catch(e){}
+}
+function applyHiddenCols(){
+  const wrap=$('tc-content');if(!wrap)return;
+  const hidden=loadHiddenCols();
+  // Remove all tc-hide-col-N classes from the inner container, then re-add for hidden
+  for(let i=1;i<=8;i++)wrap.classList.remove('tc-hide-col-'+i);
+  hidden.forEach(i=>wrap.classList.add('tc-hide-col-'+i));
+}
+window.tcOpenColumnsMenu=function(ev){
+  ev.stopPropagation();
+  const pop=$('tc-popover');
+  const cols=state.tab==='completed'
+    ?[{idx:1,name:'Residence'},{idx:2,name:'Staff'},{idx:3,name:'Training file'},{idx:4,name:'Type'},{idx:5,name:'Score'},{idx:6,name:'Status'},{idx:7,name:'Date'},{idx:8,name:'Folder'}]
+    :[{idx:1,name:'Residence'},{idx:2,name:'Staff'},{idx:3,name:'Training file'},{idx:4,name:'Type'},{idx:6,name:'Status'},{idx:8,name:'Folder'}];
+  const hidden=loadHiddenCols();
+  let html='<div style="padding:6px 10px;font-size:11px;color:#64748b;border-bottom:1px solid #e5e7eb;margin-bottom:4px;">Show / hide columns</div>';
+  cols.forEach(c=>{
+    const isHidden=hidden.has(c.idx);
+    html+=`<div class="tc-popover-item" onclick="tcToggleCol(${c.idx})"><input type="checkbox" ${!isHidden?'checked':''} style="pointer-events:none;margin-right:6px;"><span style="flex:1;">${c.name}</span></div>`;
+  });
+  html+='<div class="tc-popover-divider"></div>';
+  html+='<div class="tc-popover-item" onclick="tcShowAllCols()" style="color:#0369a1;font-size:12px;">↺ Show all</div>';
+  pop.innerHTML=html;pop.classList.add('show');
+  const btn=ev.currentTarget;const w=wrapper();const wRect=w.getBoundingClientRect();const bRect=btn.getBoundingClientRect();
+  let left=bRect.left-wRect.left;let top=bRect.bottom-wRect.top+4;
+  const popW=240;
+  if(left+popW>wRect.width-10)left=wRect.width-popW-10;
+  if(left<10)left=10;
+  pop.style.left=left+'px';pop.style.top=top+'px';
+};
+window.tcToggleCol=function(idx){
+  const hidden=loadHiddenCols();
+  if(hidden.has(idx))hidden.delete(idx);else hidden.add(idx);
+  saveHiddenCols(hidden);
+  applyHiddenCols();
+  // Refresh popover to show new state
+  const ev={stopPropagation:()=>{},currentTarget:document.querySelector('button[onclick="tcOpenColumnsMenu(event)"]')};
+  if(ev.currentTarget)tcOpenColumnsMenu(ev);
+};
+window.tcShowAllCols=function(){
+  saveHiddenCols(new Set());
+  applyHiddenCols();
+  closePopover();
+  toast('All columns shown');
+};
+window.tcRender=render;
+
+function flashAndRemove(itemId,cb){
+  const row=document.querySelector(`tr.tc-row[data-item="${itemId}"]`);
+  if(row){row.classList.add('flash');setTimeout(()=>{row.classList.add('leaving');setTimeout(cb,300);},400);}else{cb();}
+}
+
+window.tcView=function(id){const it=items.find(i=>i.id===id);toast(`Would open ${it.staff}'s training file`);};
+window.tcClear=function(){state.loc='all';state.type='all';if($('tc-f-loc'))$('tc-f-loc').value='all';if($('tc-f-type'))$('tc-f-type').value='all';render();};
+
+window.tcExport=function(){
+  const data=getExportData();
+  if(data.rows.length===0){toast('Nothing to export in this view');return;}
+  const headers=['Residence','Staff','Training','Type','Score','Pass/Fail','Date completed','Individual','Folder'];
+  const csvRows=[headers];
+  data.rows.forEach(i=>{
+    const passStr=i.status==='incomplete'?'':(i.passed?'Pass':(i.passed===false?'Fail':''));
+    const scoreStr=i.score!=null?(i.score+'/5'):'';
+    const dateStr=i.completedAt?new Date(i.completedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+    csvRows.push([i.loc,i.staff,i.training,i.type,scoreStr,passStr,dateStr,i.ind||'',folderNameFor(i.id)]);
+  });
+  const csv=csvRows.map(r=>r.map(c=>{const s=String(c==null?'':c);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(',')).join('\r\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');const date=new Date().toISOString().slice(0,10);
+  a.href=url;a.download=`hasc-trainings-${state.tab}-${date}.csv`;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+  toast(`Downloaded ${data.rows.length} row${data.rows.length===1?'':'s'} as CSV`);
+};
+
+window.tcPrint=function(){
+  const data=getExportData();
+  if(data.rows.length===0){toast('Nothing to print in this view');return;}
+  const date=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  let html=`<div style="font-family:Arial,sans-serif;color:#000;">`;
+  html+=`<div style="border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:16px;">`;
+  html+=`<h1 style="font-size:20px;margin:0 0 4px;">HASC — ${esc(data.title)}</h1>`;
+  html+=`<div style="font-size:11px;color:#555;">Printed ${date} · ${data.rows.length} record${data.rows.length===1?'':'s'}</div>`;
+  html+=`</div><table style="width:100%;border-collapse:collapse;font-size:11px;">`;
+  html+=`<thead><tr style="background:#eee;border-bottom:1px solid #000;">`;
+  ['Residence','Staff','Training','Type','Score','Pass/Fail','Date','Individual','Folder'].forEach(h=>{html+=`<th style="text-align:left;padding:5px 6px;border:0.5px solid #999;">${h}</th>`;});
+  html+=`</tr></thead><tbody>`;
+  data.rows.forEach(i=>{
+    const passStr=i.status==='incomplete'?'':(i.passed?'Pass':(i.passed===false?'Fail':''));
+    const scoreStr=i.score!=null?(i.score+'/5'):'';
+    const dateStr=i.completedAt?new Date(i.completedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+    html+=`<tr>
+<td style="padding:4px 6px;border:0.5px solid #ccc;">${esc(i.loc)}</td>
+<td style="padding:4px 6px;border:0.5px solid #ccc;">${esc(i.staff)}</td>
+<td style="padding:4px 6px;border:0.5px solid #ccc;">${esc(i.training)}</td>
+<td style="padding:4px 6px;border:0.5px solid #ccc;">${esc(i.type)}</td>
+<td style="padding:4px 6px;border:0.5px solid #ccc;">${scoreStr}</td>
+<td style="padding:4px 6px;border:0.5px solid #ccc;">${passStr}</td>
+<td style="padding:4px 6px;border:0.5px solid #ccc;">${dateStr}</td>
+<td style="padding:4px 6px;border:0.5px solid #ccc;">${esc(i.ind||'')}</td>
+<td style="padding:4px 6px;border:0.5px solid #ccc;">${esc(folderNameFor(i.id))}</td>
+</tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  const area=$('tc-print-area');
+  area.innerHTML=html;area.style.display='block';
+  setTimeout(()=>{try{window.print();}catch(e){toast('Print blocked by browser');}setTimeout(()=>{area.style.display='none';},500);},50);
+};
+
+window.tcOpenPopover=function(ev,itemId){
+  ev.stopPropagation();
+  const pop=$('tc-popover');const btn=ev.currentTarget;
+  let html='';
+  folders.forEach(f=>{
+    const isCur=itemFolder[itemId]===f.id;
+    html+=`<div class="tc-popover-item" onclick="tcMoveToFolder('${itemId}','${f.id}')"><span style="font-size:14px;color:#64748b;">📁</span><span style="flex:1;">${esc(f.name)}</span>${isCur?'<span style="color:#059669;">✓</span>':''}</div>`;
+  });
+  if(folders.length>0)html+='<div class="tc-popover-divider"></div>';
+  if(itemFolder[itemId])html+=`<div class="tc-popover-item" onclick="tcMoveToFolder('${itemId}','')" style="color:#64748b;"><span style="font-size:14px;">✕</span>Remove from folder</div>`;
+  html+=`<div class="tc-popover-item" onclick="tcNewFolderInline('${itemId}')" style="color:#0369a1;"><span style="font-size:14px;">📁+</span>New folder...</div>`;
+  pop.innerHTML=html;pop.classList.add('show');
+  const w=wrapper();const wRect=w.getBoundingClientRect();const bRect=btn.getBoundingClientRect();
+  let left=bRect.left-wRect.left;let top=bRect.bottom-wRect.top+4;
+  const popW=pop.offsetWidth;
+  if(left+popW>wRect.width-10)left=wRect.width-popW-10;
+  if(left<10)left=10;
+  pop.style.left=left+'px';pop.style.top=top+'px';
+};
+function closePopover(){const pop=$('tc-popover');if(pop)pop.classList.remove('show');}
+document.addEventListener('click',e=>{if(!e.target.closest('.tc-popover')&&!e.target.closest('.tc-folder-btn'))closePopover();});
+
+window.tcMoveToFolder=function(itemId,folderId){
+  closePopover();
+  if(folderId){const f=folders.find(x=>x.id===folderId);toast(`File moved to ${f.name}`);flashAndRemove(itemId,()=>{itemFolder[itemId]=folderId;render();});}
+  else{delete itemFolder[itemId];toast('File removed from folder');render();}
+};
+window.tcNewFolderInline=function(itemId){
+  closePopover();
+  const pop=$('tc-popover');
+  pop.innerHTML=`<div style="padding:8px;">
+<div style="font-size:11px;color:#64748b;margin-bottom:6px;">Name for new folder:</div>
+<input type="text" class="tc-inline-input" id="tc-new-folder-inline" placeholder="e.g. Audit Q3 2026" onkeydown="if(event.key==='Enter')tcCreateInlineFolder('${itemId}');if(event.key==='Escape')tcCancelInline()">
+<div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end;">
+<button class="tc-cancel-btn" onclick="tcCancelInline()">Cancel</button>
+<button class="btn btn-primary btn-sm" onclick="tcCreateInlineFolder('${itemId}')">Create</button>
+</div></div>`;
+  pop.classList.add('show');
+  const btn=document.querySelector(`.tc-folder-btn[onclick*="${itemId}"]`);
+  if(btn){const w=wrapper();const wRect=w.getBoundingClientRect();const bRect=btn.getBoundingClientRect();let left=bRect.left-wRect.left;let top=bRect.bottom-wRect.top+4;const popW=240;if(left+popW>wRect.width-10)left=wRect.width-popW-10;if(left<10)left=10;pop.style.left=left+'px';pop.style.top=top+'px';}
+  setTimeout(()=>{const inp=$('tc-new-folder-inline');if(inp)inp.focus();},20);
+};
+window.tcCancelInline=function(){closePopover();};
+window.tcCreateInlineFolder=function(itemId){
+  const inp=$('tc-new-folder-inline');if(!inp)return;
+  const name=inp.value.trim();if(!name){toast('Enter a name');return;}
+  if(folders.some(f=>f.name.toLowerCase()===name.toLowerCase())){toast('That name already exists');return;}
+  const f={id:'f'+Date.now(),name:name};folders.push(f);
+  closePopover();toast(`Created "${name}" and moved file`);
+  flashAndRemove(itemId,()=>{itemFolder[itemId]=f.id;render();});
+};
+window.tcCreateFolder=function(){
+  const inp=$('tc-new-folder');const name=inp.value.trim();
+  if(!name){toast('Enter a folder name first');return;}
+  if(folders.some(f=>f.name.toLowerCase()===name.toLowerCase())){toast('That name already exists');return;}
+  folders.push({id:'f'+Date.now(),name:name});toast(`Created folder "${name}"`);render();
+};
+window.tcStartRename=function(fid){state.renamingFolder=fid;state.confirmDel=null;render();};
+window.tcCancelRename=function(){state.renamingFolder=null;render();};
+window.tcCommitRename=function(fid){
+  const inp=$('tc-rename-'+fid);if(!inp){state.renamingFolder=null;render();return;}
+  const newName=inp.value.trim();const f=folders.find(x=>x.id===fid);
+  if(newName&&f&&newName!==f.name){
+    if(folders.some(x=>x.id!==fid&&x.name.toLowerCase()===newName.toLowerCase())){toast('That name is taken');return;}
+    f.name=newName;toast('Renamed');
+  }
+  state.renamingFolder=null;render();
+};
+window.tcAskDelete=function(fid){state.confirmDel=fid;state.renamingFolder=null;render();};
+window.tcCancelConfirmDel=function(){state.confirmDel=null;render();};
+window.tcConfirmDelete=function(fid){
+  const f=folders.find(x=>x.id===fid);if(!f)return;
+  folders=folders.filter(x=>x.id!==fid);
+  Object.keys(itemFolder).forEach(k=>{if(itemFolder[k]===fid)delete itemFolder[k];});
+  if(state.activeFolder===fid)state.activeFolder=null;
+  state.confirmDel=null;toast(`Deleted "${f.name}"`);render();
+};
+window.tcOpenFolder=function(fid){state.activeFolder=fid;state.confirmDeleteItem=null;render();};
+window.tcRemoveFromFolder=function(itemId){delete itemFolder[itemId];toast('File moved back to active list');render();};
+
+/* ===== BULK SELECTION ===== */
+window.tcToggleSelect=function(itemId){
+  if(state.selectedItems.has(itemId))state.selectedItems.delete(itemId);
+  else state.selectedItems.add(itemId);
+  render();
+};
+window.tcToggleSelectAll=function(){
+  const list=getFiltered();
+  const allSelected=list.length>0&&list.every(i=>state.selectedItems.has(i.id));
+  if(allSelected)list.forEach(i=>state.selectedItems.delete(i.id));
+  else list.forEach(i=>state.selectedItems.add(i.id));
+  render();
+};
+window.tcClearSelection=function(){state.selectedItems.clear();render();};
+window.tcOpenBulkMovePopover=function(ev){
+  ev.stopPropagation();
+  const pop=$('tc-popover');
+  let html=`<div style="padding:6px 10px;font-size:11px;color:#64748b;border-bottom:1px solid #e5e7eb;margin-bottom:4px;">Move ${state.selectedItems.size} file${state.selectedItems.size===1?'':'s'} to:</div>`;
+  if(folders.length===0){
+    html+=`<div style="padding:10px;color:#94a3b8;font-size:12px;text-align:center;">No folders yet</div>`;
+    html+=`<div class="tc-popover-divider"></div>`;
+  }else{
+    folders.forEach(f=>{
+      const count=Object.values(itemFolder).filter(v=>v===f.id).length;
+      html+=`<div class="tc-popover-item" onclick="tcBulkMoveToFolder('${f.id}')"><span style="font-size:14px;color:#64748b;">📁</span><span style="flex:1;">${esc(f.name)}</span><span style="font-size:10px;color:#94a3b8;">${count}</span></div>`;
+    });
+    html+=`<div class="tc-popover-divider"></div>`;
+  }
+  html+=`<div class="tc-popover-item" onclick="tcBulkNewFolder()" style="color:#0369a1;"><span style="font-size:14px;">📁+</span>Create new folder...</div>`;
+  pop.innerHTML=html;pop.classList.add('show');
+  const btn=ev.currentTarget;const w=wrapper();const wRect=w.getBoundingClientRect();const bRect=btn.getBoundingClientRect();
+  let left=bRect.left-wRect.left;let top=bRect.bottom-wRect.top+4;
+  const popW=pop.offsetWidth;
+  if(left+popW>wRect.width-10)left=wRect.width-popW-10;
+  if(left<10)left=10;
+  pop.style.left=left+'px';pop.style.top=top+'px';
+};
+window.tcBulkMoveToFolder=function(folderId){
+  closePopover();
+  const ids=Array.from(state.selectedItems);
+  const f=folders.find(x=>x.id===folderId);if(!f)return;
+  ids.forEach(id=>itemFolder[id]=folderId);
+  state.selectedItems.clear();
+  toast(`Moved ${ids.length} file${ids.length===1?'':'s'} to "${f.name}"`);
+  render();
+};
+window.tcBulkNewFolder=function(){
+  closePopover();
+  const pop=$('tc-popover');
+  pop.innerHTML=`<div style="padding:8px;">
+<div style="font-size:11px;color:#64748b;margin-bottom:6px;">Name for new folder:</div>
+<input type="text" class="tc-inline-input" id="tc-bulk-new-folder" placeholder="e.g. Audit Q3 2026" onkeydown="if(event.key==='Enter')tcBulkCreateAndMove();if(event.key==='Escape')tcCancelInline()">
+<div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end;">
+<button class="tc-cancel-btn" onclick="tcCancelInline()">Cancel</button>
+<button class="btn btn-primary btn-sm" onclick="tcBulkCreateAndMove()">Create &amp; Move</button>
+</div></div>`;
+  pop.classList.add('show');
+  setTimeout(()=>{const inp=$('tc-bulk-new-folder');if(inp)inp.focus();},20);
+};
+window.tcBulkCreateAndMove=function(){
+  const inp=$('tc-bulk-new-folder');if(!inp)return;
+  const name=inp.value.trim();if(!name){toast('Enter a name');return;}
+  if(folders.some(f=>f.name.toLowerCase()===name.toLowerCase())){toast('That name already exists');return;}
+  const f={id:'f'+Date.now(),name:name};folders.push(f);
+  const ids=Array.from(state.selectedItems);
+  ids.forEach(id=>itemFolder[id]=f.id);
+  state.selectedItems.clear();
+  closePopover();
+  toast(`Created "${name}" and moved ${ids.length} file${ids.length===1?'':'s'}`);
+  render();
+};
+window.tcAskDeleteItem=function(itemId){state.confirmDeleteItem=itemId;render();};
+window.tcCancelDeleteItem=function(){state.confirmDeleteItem=null;render();};
+window.tcConfirmDeleteItem=function(itemId){
+  const it=items.find(x=>x.id===itemId);if(!it){state.confirmDeleteItem=null;render();return;}
+  // TODO: when wired to Supabase, also delete the row from the training-assignment table here
+  items=items.filter(x=>x.id!==itemId);
+  delete itemFolder[itemId];
+  state.confirmDeleteItem=null;
+  toast(`Deleted training: ${it.training}`);
+  render();
+};
+
+window.tcAddLink=function(){
+  const nameEl=$('tc-new-link-name'),urlEl=$('tc-new-link-url');
+  const name=nameEl.value.trim(),url=urlEl.value.trim();
+  if(!name||!url){toast('Need both a name and a URL');return;}
+  if(!/^https?:\/\//i.test(url)){toast('URL must start with http:// or https://');return;}
+  const links=loadLinks();
+  links.unshift({id:'l'+Date.now()+Math.random().toString(36).slice(2,6),name:name,url:url,created_at:new Date().toISOString()});
+  saveLinks(links);
+  nameEl.value='';urlEl.value='';
+  toast('Link saved');
+  render();
+  setTimeout(()=>{const n=$('tc-new-link-name');if(n)n.focus();},20);
+};
+window.tcCopyLink=function(id){
+  const links=loadLinks();const link=links.find(l=>l.id===id);if(!link)return;
+  const fallback=()=>{const ta=document.createElement('textarea');ta.value=link.url;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link.url).then(()=>toast('URL copied to clipboard')).catch(()=>{fallback();toast('URL copied');});
+  }else{fallback();toast('URL copied');}
+};
+window.tcOpenLink=function(id){
+  const links=loadLinks();const link=links.find(l=>l.id===id);if(!link)return;
+  window.open(link.url,'_blank','noopener');
+};
+window.tcDeleteLink=function(id){
+  const links=loadLinks();const link=links.find(l=>l.id===id);if(!link)return;
+  if(!confirm(`Delete "${link.name}"?`))return;
+  saveLinks(links.filter(l=>l.id!==id));
+  toast('Link deleted');
+  render();
+};
+
+function toast(msg){const t=$('tc-toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),1800);}
+
+/* Wire tab buttons inside the dashboard */
+function wireDashboardTabs(){
+  const tabs=document.querySelectorAll('#tc-tabs .tc-tab');
+  if(tabs.length===0)return false;
+  tabs.forEach(t=>{
+    if(t._wired)return;
+    t._wired=true;
+    t.addEventListener('click',()=>{state.tab=t.dataset.tab;state.activeFolder=null;state.renamingFolder=null;state.confirmDel=null;state.confirmDeleteItem=null;state.selectedItems.clear();render();});
+  });
+  ['tc-f-loc','tc-f-type','tc-f-group'].forEach(id=>{
+    const el=$(id);if(!el||el._wired)return;el._wired=true;
+    el.addEventListener('change',e=>{
+      if(id==='tc-f-loc')state.loc=e.target.value;
+      else if(id==='tc-f-type')state.type=e.target.value;
+      else if(id==='tc-f-group')state.group=e.target.value;
+      render();
+    });
+  });
+  return true;
+}
+
+/* Initial wiring + first render once the DOM is ready */
+function init(){if(!wireDashboardTabs()){setTimeout(init,200);return;}render();}
+document.addEventListener('DOMContentLoaded',init);
+setTimeout(init,500);
+})();
+</script>
+
+</body>
+</html>
