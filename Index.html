@@ -929,7 +929,37 @@ function loadLinks(){
   if(fresh.length!==raw.length){saveLinks(fresh);} // silently purge expired
   return fresh;
 }
-function saveLinks(links){try{localStorage.setItem(LINK_STORAGE_KEY,JSON.stringify(links));}catch(e){toast('Could not save — storage full');}}
+function saveLinks(links){try{localStorage.setItem(LINK_STORAGE_KEY,JSON.stringify(links));}catch(e){toast('Could not save — storage full');}
+    try{ if(window.dbSyncLinks) window.dbSyncLinks(links); }catch(e){}
+  }
+  // === DB-backed training links (added) ===
+  async function dbSyncLinks(links){
+    try{
+      const ids = (links||[]).map(function(l){return l.id;});
+      const cur = await sb.from('training_links').select('id');
+      const dbIds = (cur && cur.data ? cur.data : []).map(function(r){return r.id;});
+      var toInsert = (links||[]).filter(function(l){return dbIds.indexOf(l.id)===-1;}).map(function(l){
+        return { id:l.id, name:l.name, url:(l.url||null), created_at:(l.created_at||new Date().toISOString()) };
+      });
+      if(toInsert.length){ await sb.from('training_links').upsert(toInsert); }
+      var toDelete = dbIds.filter(function(id){return ids.indexOf(id)===-1;});
+      for(var i=0;i<toDelete.length;i++){ await sb.from('training_links').delete().eq('id', toDelete[i]); }
+    }catch(e){}
+  }
+  window.dbSyncLinks = dbSyncLinks;
+
+  async function dbPrimeLinks(){
+    try{
+      const res = await sb.from('training_links').select('*');
+      if(res && res.data){
+        const rows = res.data.map(function(r){ return { id:r.id, name:r.name, url:r.url, created_at:r.created_at }; });
+        localStorage.setItem(LINK_STORAGE_KEY, JSON.stringify(rows));
+        if(window.render){ try{ window.render(); }catch(e){} }
+      }
+    }catch(e){}
+  }
+  window.dbPrimeLinks = dbPrimeLinks;
+
 function daysLeft(createdAt){
   const elapsedMs=Date.now()-new Date(createdAt).getTime();
   const left=LINK_TTL_DAYS-(elapsedMs/(24*60*60*1000));
@@ -1513,7 +1543,14 @@ setTimeout(init,500);
         setTimeout(function(){ if(window.tcLoadFoldersFromDB) window.tcLoadFoldersFromDB(); }, 1500);
     })();
   </script>
-  </script>
+  
+  // === boot: pull training links from DB so they survive refresh/login ===
+  (function(){
+    function _prime(){ try{ if(window.dbPrimeLinks) window.dbPrimeLinks(); }catch(e){} }
+    if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', function(){ setTimeout(_prime, 300); }); }
+    else { setTimeout(_prime, 300); }
+  })();
+</script>
 
 </body>
 </html>
