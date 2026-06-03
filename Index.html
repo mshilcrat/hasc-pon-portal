@@ -1436,5 +1436,84 @@ setTimeout(init,500);
 })();
 </script>
 
+  <!-- ====================================================================== -->
+  <!-- ===== DASHBOARD PERSISTENCE PATCH (folders + move + delete save) ===== -->
+  <!-- ====================================================================== -->
+  <script>
+    (function(){
+        // certId(itemId): dashboard item ids look like "c<uuid>"; strip leading "c" to get the real certificate id.
+        function certId(itemId){ var s=String(itemId||''); return s.charAt(0)==='c' ? s.slice(1) : s; }
+        function dbReady(){ return (typeof sb!=='undefined') && sb && typeof sb.from==='function'; }
+
+        // Load saved folders from the database and rebuild the in-memory folder list + assignments.
+        window.tcLoadFoldersFromDB = async function(){
+              if(!dbReady()) return;
+              try{
+                      var fr = await sb.from('training_folders').select('id,name').order('created_at',{ascending:true});
+                      var rows = fr.data || [];
+                      if(window.tcSetFolders){ window.tcSetFolders(rows); }
+              }catch(e){ console.error('tcLoadFoldersFromDB',e); }
+        };
+
+        // Create a folder: save to DB, then refresh.
+        async function dbCreateFolder(name){
+              var r = await sb.from('training_folders').insert({name:name}).select('id,name').single();
+              return r.data;
+        }
+        // Delete a folder from DB.
+        async function dbDeleteFolder(fid){ await sb.from('training_folders').delete().eq('id',fid); }
+        // Move: write the folder name onto the certificate (archive_file) and mark archived.
+        async function dbMoveCert(itemId,folderName){
+              await sb.from('certificates').update({archive_file:folderName||null, is_archived:!!folderName}).eq('id',certId(itemId));
+        }
+        // Really delete a certificate row.
+        async function dbDeleteCert(itemId){ await sb.from('certificates').delete().eq('id',certId(itemId)); }
+
+        function wrap(origName, fn){
+              var orig = window[origName];
+              window[origName] = async function(){
+                      try{ await fn.apply(this, arguments); }catch(e){ console.error(origName,e); }
+                      if(typeof orig==='function'){ try{ orig.apply(this, arguments); }catch(e){} }
+              };
+        }
+
+        // Save when moving a file to / out of a folder.
+        var origMove = window.tcMoveToFolder;
+        window.tcMoveToFolder = function(itemId, folderId){
+              var name='';
+              if(folderId && window.tcFolderName){ name = window.tcFolderName(folderId)||''; }
+              dbMoveCert(itemId, name);
+              if(typeof origMove==='function') origMove(itemId, folderId);
+        };
+        var origRemove = window.tcRemoveFromFolder;
+        window.tcRemoveFromFolder = function(itemId){
+              dbMoveCert(itemId, '');
+              if(typeof origRemove==='function') origRemove(itemId);
+        };
+        // Save real delete of a training (certificate).
+        var origDelItem = window.tcConfirmDeleteItem;
+        window.tcConfirmDeleteItem = function(itemId){
+              dbDeleteCert(itemId);
+              if(typeof origDelItem==='function') origDelItem(itemId);
+        };
+        // Save folder create + delete.
+        var origCreate = window.tcCreateFolder;
+        window.tcCreateFolder = function(){
+              var inp=document.getElementById('tc-new-folder'); var name=inp?inp.value.trim():'';
+              if(name){ dbCreateFolder(name).then(function(){ if(window.tcLoadFoldersFromDB) window.tcLoadFoldersFromDB(); }); }
+              if(typeof origCreate==='function') origCreate();
+        };
+        var origFolderDel = window.tcConfirmDelete;
+        window.tcConfirmDelete = function(fid){
+              dbDeleteFolder(fid);
+              if(typeof origFolderDel==='function') origFolderDel(fid);
+        };
+
+        // Load folders shortly after startup.
+        setTimeout(function(){ if(window.tcLoadFoldersFromDB) window.tcLoadFoldersFromDB(); }, 1500);
+    })();
+  </script>
+  </script>
+
 </body>
 </html>
