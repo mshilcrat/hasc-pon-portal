@@ -756,7 +756,7 @@ const SAMPLE_ITEMS=[];
     let items=SAMPLE_ITEMS.slice();
 const state={tab:'completed',loc:'all',type:'all',ind:'all',group:'location',activeFolder:null,renamingFolder:null,confirmDel:null,confirmDeleteItem:null,selectedItems:new Set()};
 let folders=[];
-const itemFolder={};
+const __itemFolderRaw={};const itemFolder=new Proxy(__itemFolderRaw,{set(t,k,v){const ch=t[k]!==v;t[k]=v;if(ch&&typeof k==='string'){try{dbSaveItemFolder(k,v);}catch(e){}}return true;},deleteProperty(t,k){const had=k in t;delete t[k];if(had&&typeof k==='string'){try{dbSaveItemFolder(k,null);}catch(e){}}return true;}});
 let nextId=100;
 const LINK_TTL_DAYS=10;
 const LINK_STORAGE_KEY='hasc_training_links_v1';
