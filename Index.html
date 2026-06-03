@@ -1144,12 +1144,13 @@ function render(){
   }
   window.dbSaveItemFolder = dbSaveItemFolder;
 
-  async function tcReloadItemFoldersLocal(){
+  async function dbRenameFolder(fid,nm){try{sb.from('training_folders').update({name:nm}).eq('id',fid).then(function(){});}catch(e){} }
+function tcReloadItemFoldersLocal(){
     try{
       const res = await sb.from('certificates').select('id,archive_file,is_archived');
       if(res && !res.error && Array.isArray(res.data)){
         res.data.forEach(function(r){
-          if(r.archive_file){ itemFolder['c'+r.id] = r.archive_file; itemFolder[r.id] = r.archive_file; }
+          if(r.archive_file){ itemFolder['c'+r.id] = r.archive_file; }
         });
         try{ render(); }catch(e){}
       }
@@ -1351,7 +1352,7 @@ window.tcCommitRename=function(fid){
   const newName=inp.value.trim();const f=folders.find(x=>x.id===fid);
   if(newName&&f&&newName!==f.name){
     if(folders.some(x=>x.id!==fid&&x.name.toLowerCase()===newName.toLowerCase())){toast('That name is taken');return;}
-    f.name=newName;toast('Renamed');
+    f.name=newName;if(f&&f.id){dbRenameFolder(f.id,newName);}toast('Renamed');
   }
   state.renamingFolder=null;render();
 };
