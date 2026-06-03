@@ -1483,30 +1483,30 @@ setTimeout(init,500);
               var name='';
               if(folderId && window.tcFolderName){ name = window.tcFolderName(folderId)||''; }
               dbMoveCert(itemId, name);
-              /* fake move disabled */
+              if(typeof origMove==='function') origMove(itemId, folderId);
         };
         var origRemove = window.tcRemoveFromFolder;
         window.tcRemoveFromFolder = function(itemId){
               dbMoveCert(itemId, '');
-              /* fake remove disabled */
+              if(typeof origRemove==='function') origRemove(itemId);
         };
         // Save real delete of a training (certificate).
         var origDelItem = window.tcConfirmDeleteItem;
         window.tcConfirmDeleteItem = function(itemId){
               dbDeleteCert(itemId);
-              /* fake item delete disabled */
+              if(typeof origDelItem==='function') origDelItem(itemId);
         };
         // Save folder create + delete.
         var origCreate = window.tcCreateFolder;
         window.tcCreateFolder = function(){
               var inp=document.getElementById('tc-new-folder'); var name=inp?inp.value.trim():'';
               if(name){ dbCreateFolder(name).then(function(){ if(window.tcLoadFoldersFromDB) window.tcLoadFoldersFromDB(); }); }
-              /* fake create disabled */
+              if(typeof origCreate==='function') origCreate();
         };
         var origFolderDel = window.tcConfirmDelete;
         window.tcConfirmDelete = function(fid){
               dbDeleteFolder(fid);
-              /* fake folder delete disabled */
+              if(typeof origFolderDel==='function') origFolderDel(fid);
         };
 
         // Load folders shortly after startup.
