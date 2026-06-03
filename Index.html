@@ -1446,7 +1446,7 @@ setTimeout(init,500);
         function dbReady(){ return (typeof sb!=='undefined') && sb && typeof sb.from==='function'; }
 
         // Load saved folders from the database and rebuild the in-memory folder list + assignments.
-        window.tcLoadFoldersFromDB = async function(){
+        window.tcSetFolders = function(rows){ folders = Array.isArray(rows) ? rows : []; if(typeof render==='function') render(); };window.tcLoadFoldersFromDB = async function(){
               if(!dbReady()) return;
               try{
                       var fr = await sb.from('training_folders').select('id,name').order('created_at',{ascending:true});
