@@ -1123,6 +1123,24 @@ function render(){
   applyHiddenCols();
 }
 
+  // === FIX: load folders from DB into THIS scope's folders array on startup ===
+  async function tcReloadFoldersLocal(){
+    try{
+      const res = await sb.from('training_folders').select('*').order('created_at',{ascending:true});
+      if(res && !res.error && Array.isArray(res.data)){
+        folders = res.data.map(function(r){ return { id:r.id, name:r.name, created_at:r.created_at, items:[] }; });
+        try{ render(); }catch(e){}
+      }
+    }catch(e){}
+  }
+  window.tcReloadFoldersLocal = tcReloadFoldersLocal;
+  (function(){
+    function _go(){ try{ tcReloadFoldersLocal(); }catch(e){} }
+    if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', function(){ setTimeout(_go, 600); }); }
+    else { setTimeout(_go, 600); }
+  })();
+
+
 /* ===== HIDE / SHOW COLUMNS ===== */
 function loadHiddenCols(){
   const key='hasc_hidden_cols_'+state.tab;
