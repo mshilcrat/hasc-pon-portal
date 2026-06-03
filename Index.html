@@ -1145,7 +1145,7 @@ function render(){
   window.dbSaveItemFolder = dbSaveItemFolder;
 
   async function dbRenameFolder(fid,nm){try{sb.from('training_folders').update({name:nm}).eq('id',fid).then(function(){});}catch(e){} }
-function tcReloadItemFoldersLocal(){
+async function tcReloadItemFoldersLocal(){
     try{
       const res = await sb.from('certificates').select('id,archive_file,is_archived');
       if(res && !res.error && Array.isArray(res.data)){
