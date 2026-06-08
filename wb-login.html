@@ -9,6 +9,7 @@ html,body{margin:0;padding:0;height:100%;background:#f4f6f9;font-family:-apple-s
 .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
 .card{background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.1);padding:34px 30px;width:100%;max-width:360px;border-top:4px solid #3FC1C9;}
 .logo{display:flex;justify-content:center;margin-bottom:18px;}
+.logo img{height:42px;width:auto;display:block;}
 h1{font-size:18px;font-weight:800;text-align:center;margin:0 0 4px;color:#1a8c94;}
 .sub{font-size:12px;color:#8a9ab0;text-align:center;margin:0 0 22px;}
 label{display:block;font-size:12px;font-weight:600;color:#5a6a7e;margin:0 0 5px;}
@@ -24,7 +25,7 @@ button:disabled{opacity:.6;cursor:default;}
 </head>
 <body>
 <div class="wrap"><div class="card">
-<div class="logo"><svg width="150" height="38" viewBox="0 0 132 34" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="2" width="13" height="13" rx="1" fill="#F5C518"/><rect x="0" y="18" width="13" height="13" rx="1" fill="#3FC1C9"/><path d="M17 15 L23.5 2 L30 15 Z" fill="#F5C518"/><path d="M30 26 a6.5 6.5 0 1 1 0 -9 l-2.2 2.6 a3 3 0 1 0 0 3.8 Z" fill="#3FC1C9"/><text x="40" y="15" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="800" fill="#3FC1C9" letter-spacing="0.5">HASC</text><text x="40" y="29" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="800" fill="#3FC1C9" letter-spacing="0.5">CENTER</text></svg></div>
+<div class="logo"><img src="hasc-logo.png" alt="HASC Center"></div>
 <h1>Training Workbook</h1>
 <p class="sub">Sign in to continue</p>
 <form id="loginForm">
@@ -43,7 +44,6 @@ button:disabled{opacity:.6;cursor:default;}
 var sb=window.supabase.createClient(window.HASC_CONFIG.SUPABASE_URL, window.HASC_CONFIG.SUPABASE_ANON_KEY);
 var msg=document.getElementById("msg");
 var btn=document.getElementById("btn");
-// If already signed in, go straight to the library
 (async function(){
   var s=await sb.auth.getSession();
   if(s.data && s.data.session){ window.location.href="wb-library.html"; }
