@@ -119,9 +119,9 @@ let ponUrl=null;
 if(ponFile){
 const safe=ponFile.name.replace(/[^a-zA-Z0-9._-]/g,'_');
 const path=Date.now()+'_'+safe;
-const up=await sb.storage.from('documents').upload(path,ponFile,{upsert:true});
+const up=await sb.storage.from('pon-docs').upload(path,ponFile,{upsert:false});
 if(up.error){msg.textContent='Document upload failed: '+up.error.message;return;}
-ponUrl=sb.storage.from('documents').getPublicUrl(path).data.publicUrl;
+ponUrl=sb.storage.from('pon-docs').getPublicUrl(path).data.publicUrl;
 }
   const qcards=[...document.querySelectorAll('.qcard')];const questions=[];
   for(let n=0;n<qcards.length;n++){
