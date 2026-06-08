@@ -70,10 +70,10 @@
         <div><label class="fld">Residence Name *</label><select class="in" id="residence"><option value="">-- Select Residence --</option></select></div>
         <div id="indWrap"><label class="fld">Individual Name *</label><input class="in" id="indName" placeholder="Individual being trained on"></div>
       </div>
-      <label class="fld">Video URL (ScreenPal) *</label>
+      <label class="fld">Video URL (ScreenPal)</label>
       <input class="in" id="video" placeholder="Paste full ScreenPal embed link">
-      <label class="fld">PON Training Document (optional)</label>
-      <div class="filebox"><input type="file" id="pon"></div>
+      <label class="fld">PON Document Link (optional)</label>
+      <input class="in" id="pon" placeholder="Paste a document link (SharePoint/OneDrive/Google Doc)">
       <div class="qbox"><h2>Quiz Questions (5 Required)</h2><div id="questions"></div></div>
       <button class="submit" id="create">✅ Create Session &amp; Generate Link</button>
       <div id="msg"></div>
@@ -110,10 +110,11 @@ document.getElementById('create').onclick=async()=>{
   const residence=document.getElementById('residence').value;
   const indName=document.getElementById('indName').value.trim();
   const video=document.getElementById('video').value.trim();
+const ponLink=document.getElementById('pon').value.trim();
   if(!title){msg.textContent='Please enter a Training Title.';return;}
   if(!residence){msg.textContent='Please select a Residence.';return;}
   if(isIndividual&&!indName){msg.textContent='Please enter the Individual Name.';return;}
-  if(!video){msg.textContent='Please paste the Video URL.';return;}
+  if(!video&&!ponLink){msg.textContent='Add a Video URL or a Document Link (at least one).';return;}
   const qcards=[...document.querySelectorAll('.qcard')];const questions=[];
   for(let n=0;n<qcards.length;n++){
     const qt=qcards[n].querySelector('.qtext').value.trim();
@@ -127,7 +128,7 @@ document.getElementById('create').onclick=async()=>{
     description:title,
     individual_name:isIndividual?indName:null,
     residence:residence,
-    video_url:video,
+    video_url:video,document_url:ponLink||null,
     questions:questions,
     session_token:tok,
     nurse_email:CURRENT_USER?CURRENT_USER.email:null,
