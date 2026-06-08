@@ -72,8 +72,8 @@
       </div>
       <label class="fld">Video URL (ScreenPal)</label>
       <input class="in" id="video" placeholder="Paste full ScreenPal embed link">
-      <label class="fld">PON Document Link (optional)</label>
-      <input class="in" id="pon" placeholder="Paste a document link (SharePoint/OneDrive/Google Doc)">
+      <label class="fld">PON Training Document (optional)</label>
+      <div class="filebox"><input type="file" id="pon"></div>
       <div class="qbox"><h2>Quiz Questions (5 Required)</h2><div id="questions"></div></div>
       <button class="submit" id="create">✅ Create Session &amp; Generate Link</button>
       <div id="msg"></div>
@@ -110,11 +110,19 @@ document.getElementById('create').onclick=async()=>{
   const residence=document.getElementById('residence').value;
   const indName=document.getElementById('indName').value.trim();
   const video=document.getElementById('video').value.trim();
-const ponLink=document.getElementById('pon').value.trim();
+const ponFile=document.getElementById('pon').files[0]||null;
   if(!title){msg.textContent='Please enter a Training Title.';return;}
   if(!residence){msg.textContent='Please select a Residence.';return;}
   if(isIndividual&&!indName){msg.textContent='Please enter the Individual Name.';return;}
-  if(!video&&!ponLink){msg.textContent='Add a Video URL or a Document Link (at least one).';return;}
+  if(!video&&!ponFile){msg.textContent='Add a Video URL or upload a Document (at least one).';return;}
+let ponUrl=null;
+if(ponFile){
+const safe=ponFile.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+const path=Date.now()+'_'+safe;
+const up=await sb.storage.from('documents').upload(path,ponFile,{upsert:true});
+if(up.error){msg.textContent='Document upload failed: '+up.error.message;return;}
+ponUrl=sb.storage.from('documents').getPublicUrl(path).data.publicUrl;
+}
   const qcards=[...document.querySelectorAll('.qcard')];const questions=[];
   for(let n=0;n<qcards.length;n++){
     const qt=qcards[n].querySelector('.qtext').value.trim();
@@ -128,7 +136,7 @@ const ponLink=document.getElementById('pon').value.trim();
     description:title,
     individual_name:isIndividual?indName:null,
     residence:residence,
-    video_url:video,document_url:ponLink||null,
+    video_url:video,document_url:ponUrl,
     questions:questions,
     session_token:tok,
     nurse_email:CURRENT_USER?CURRENT_USER.email:null,
