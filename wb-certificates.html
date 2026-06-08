@@ -21,10 +21,26 @@
   .fbtn{padding:5px 11px;border-radius:6px;border:none;font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:#5a6a7e;}
   .fbtn.active{background:#fff;color:#1a8c94;box-shadow:0 1px 4px rgba(0,0,0,.12);font-weight:700;}
   .sumc{font-size:13px;color:#5a6a7e;padding:12px 24px 0;}
-  .wrap{padding:16px 24px;}
-  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.05);}
-  thead th{background:#f6f9fb;text-align:left;padding:11px 14px;font-size:12px;color:#7a8a9a;text-transform:uppercase;letter-spacing:.5px;}
-  tbody td{padding:11px 14px;border-top:1px solid #f0f2f5;font-size:13px;}
+  .wrap{padding:16px 24px;max-width:1000px;}
+  .sec-label{font-size:10px;font-weight:800;color:#8a9ab0;text-transform:uppercase;letter-spacing:1px;padding:16px 4px 6px;}
+  .rc{background:#fff;border:1px solid #e7ebf0;border-radius:10px;margin-bottom:10px;overflow:hidden;}
+  .rh{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;background:#f6f9fb;}
+  .rh:hover{background:#eef3f7;}
+  .rn{font-weight:700;font-size:14px;flex:1;}
+  .rb{display:none;padding:0 10px 10px;}
+  .rc.open .rb{display:block;}
+  .ts{border:1px solid #eef0f3;border-radius:8px;margin-top:10px;overflow:hidden;}
+  .th{display:flex;align-items:center;gap:9px;padding:10px 14px;cursor:pointer;background:#fafcfd;}
+  .th:hover{background:#f2f6f9;}
+  .tt{font-weight:600;font-size:13px;flex:1;}
+  .tcount{font-size:11px;color:#8a9ab0;}
+  .tb{display:none;}
+  .ts.open .tb{display:block;}
+  .chev{font-size:10px;color:#8a9ab0;transition:transform .15s;display:inline-block;}
+  .open>.rh .chev,.open>.th .chev{transform:rotate(90deg);}
+  table{width:100%;border-collapse:collapse;}
+  thead th{background:#fff;text-align:left;padding:9px 14px;font-size:11px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #eef0f3;}
+  tbody td{padding:10px 14px;border-top:1px solid #f3f5f7;font-size:13px;}
   tbody tr:hover{background:#fafcfd;}
   .pass{color:#1e7e44;font-weight:600;}
   .fail{color:#c0392b;font-weight:600;}
@@ -34,21 +50,21 @@
   .mini.view{color:#1a8c94;border-color:#bfe6ea;}
   .mini.del{color:#c0392b;border-color:#f0c8c2;}
   .loading{padding:40px;text-align:center;color:#8a9ab0;}
-  .errbox{margin:20px 24px;padding:14px 18px;background:#fff3e0;border:1px solid #ffcc80;border-radius:10px;color:#a36000;font-size:13px;}
+  .errbox{margin:20px 0;padding:14px 18px;background:#fff3e0;border:1px solid #ffcc80;border-radius:10px;color:#a36000;font-size:13px;}
   .ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;overflow:auto;}
   .ov.show{display:flex;}
-  .cert{background:#fff;width:720px;max-width:100%;padding:18px;border:14px double #b8b8b8;position:relative;}
+  .cert{background:#fff;width:720px;max-width:100%;padding:18px;border:14px double #b8b8b8;}
   .cert .inner{border:1px solid #d8d8d8;padding:40px 50px;text-align:center;}
   .cert h1{font-family:Georgia,'Times New Roman',serif;letter-spacing:8px;font-size:38px;color:#2b2b2b;font-weight:400;}
   .cert .oc{font-family:Georgia,serif;letter-spacing:4px;font-size:13px;color:#555;margin-top:4px;}
   .cert .ct{font-size:13px;color:#666;margin:26px 0 6px;}
   .cert .nm{font-family:Georgia,serif;font-size:30px;color:#1a1a2e;margin-bottom:18px;}
-  .cert .body{font-size:13px;color:#444;line-height:1.7;max-width:460px;margin:0 auto;}
+  .cert .cbody{font-size:13px;color:#444;line-height:1.7;max-width:460px;margin:0 auto;}
   .cert .logo{height:54px;margin:8px auto 0;}
   .cert .sigs{display:flex;justify-content:space-between;margin-top:48px;}
   .cert .sig{width:45%;}
   .cert .sig .sn{font-family:'Brush Script MT',cursive;font-size:22px;font-style:italic;border-bottom:1px solid #333;padding-bottom:2px;margin-bottom:4px;}
-  .cert .sig .rn{font-size:12px;font-weight:700;color:#222;}
+  .cert .sig .rn2{font-size:12px;font-weight:700;color:#222;}
   .cert .sig .ro{font-size:11px;color:#666;}
   .modbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px;}
   @media print{body *{visibility:hidden;}.ov,.ov *{visibility:visible;}.ov{position:absolute;background:#fff;}.modbar{display:none;}}
@@ -90,6 +106,7 @@
     let DATA = [], state = { filter:'all', search:'' };
     function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
     function fmtDate(d){ return d ? new Date(d).toLocaleDateString() : ''; }
+
     function render(){
       const q = state.search.toLowerCase();
       const rows = DATA.filter(r=>{
@@ -98,17 +115,39 @@
         const hay = ((r.dsp_name||'')+' '+(r.residence||'')+' '+(r.individual_name||'')).toLowerCase();
         return hay.indexOf(q) >= 0;
       });
-      let html = '<table><thead><tr><th>Staff Name</th><th>Training</th><th>Residence</th><th>Date</th><th>Score</th><th>Result</th><th>Actions</th></tr></thead><tbody>';
+      const byRes = {};
       rows.forEach(r=>{
-        const result = r.passed ? '<span class="pass">Pass</span>' : '<span class="fail">Fail</span>';
-        const arch = r.is_archived ? ' <span class="tag">Archived</span>' : '';
-        html += '<tr><td>'+esc(r.dsp_name)+'</td><td>'+esc(r.individual_name)+arch+'</td><td>'+esc(r.residence)+'</td><td>'+fmtDate(r.completed_at)+'</td><td>'+esc(r.score)+'</td><td>'+result+'</td><td><div class="act"><button class="mini view" onclick="viewCert(\''+r.id+'\')">View</button><button class="mini del" onclick="delRecord(\''+r.id+'\')">Delete</button></div></td></tr>';
+        const res = r.residence || '(No residence)';
+        const tr = r.individual_name || '(Untitled training)';
+        byRes[res] = byRes[res] || {};
+        byRes[res][tr] = byRes[res][tr] || [];
+        byRes[res][tr].push(r);
       });
-      html += '</tbody></table>';
+      const resNames = Object.keys(byRes).sort();
+      let html = '<div class="sec-label">&#127968; Residence Trainings</div>';
+      resNames.forEach(res=>{
+        const trainings = byRes[res];
+        const trNames = Object.keys(trainings).sort();
+        let totalCount = 0; trNames.forEach(t=>totalCount += trainings[t].length);
+        let trHtml = '';
+        trNames.forEach(tr=>{
+          const list = trainings[tr].slice().sort((a,b)=>(a.dsp_name||'').localeCompare(b.dsp_name||''));
+          let bodyT = '<table><thead><tr><th>Staff Name</th><th>Date</th><th>Score</th><th>Result</th><th>Actions</th></tr></thead><tbody>';
+          list.forEach(r=>{
+            const result = r.passed ? '<span class="pass">Pass</span>' : '<span class="fail">Fail</span>';
+            const arch = r.is_archived ? ' <span class="tag">Archived</span>' : '';
+            bodyT += '<tr><td>'+esc(r.dsp_name)+arch+'</td><td>'+fmtDate(r.completed_at)+'</td><td>'+esc(r.score)+'</td><td>'+result+'</td><td><div class="act"><button class="mini view" onclick="viewCert(\''+r.id+'\')">View</button><button class="mini del" onclick="delRecord(\''+r.id+'\')">Delete</button></div></td></tr>';
+          });
+          bodyT += '</tbody></table>';
+          trHtml += '<div class="ts open"><div class="th" onclick="this.parentNode.classList.toggle(\'open\')"><span class="chev">&#9654;</span><span class="tt">'+esc(tr)+'</span><span class="tcount">'+list.length+'</span></div><div class="tb">'+bodyT+'</div></div>';
+        });
+        html += '<div class="rc open"><div class="rh" onclick="this.parentNode.classList.toggle(\'open\')"><span class="chev">&#9654;</span><span class="rn">'+esc(res)+'</span><span class="tcount">'+totalCount+' certificates</span></div><div class="rb">'+trHtml+'</div></div>';
+      });
       if(rows.length===0) html = '<div class="loading">No certificates match.</div>';
       document.getElementById('cnt').innerHTML = html;
-      document.getElementById('summary').textContent = rows.length + ' certificate' + (rows.length===1?'':'s');
+      document.getElementById('summary').textContent = rows.length + ' certificate' + (rows.length===1?'':'s') + ' \u00b7 ' + resNames.length + ' residence' + (resNames.length===1?'':'s');
     }
+
     function viewCert(id){
       const r = DATA.find(x=>x.id===id); if(!r) return;
       const shortId = (r.id||'').replace(/-/g,'').slice(0,5).toUpperCase();
@@ -116,9 +155,9 @@
         '<div class="inner"><h1>CERTIFICATE</h1><div class="oc">OF TRAINING COMPLETION</div>'+
         '<img src="hasc-logo.png" class="logo" alt="HASC Center"><div class="ct">This certifies that</div>'+
         '<div class="nm">'+esc(r.dsp_name)+'</div>'+
-        '<div class="body">has successfully completed the '+esc(r.individual_name||'training')+' &middot; '+fmtDate(r.completed_at)+' &middot; HASC Center training for '+esc(r.residence)+'.<br>Certificate ID: '+shortId+'.<br>Final Result: '+(r.passed?'Pass':'Fail')+'.</div>'+
-        '<div class="sigs"><div class="sig"><div class="sn">Aryeh Samuelson</div><div class="rn">Aryeh Samuelson</div><div class="ro">Director of Staff Training</div></div>'+
-        '<div class="sig"><div class="sn">Avi Sacks</div><div class="rn">Avi Sacks</div><div class="ro">Chief Operating Officer</div></div></div></div>';
+        '<div class="cbody">has successfully completed the '+esc(r.individual_name||'training')+' &middot; '+fmtDate(r.completed_at)+' &middot; HASC Center training for '+esc(r.residence)+'.<br>Certificate ID: '+shortId+'.<br>Final Result: '+(r.passed?'Pass':'Fail')+'.</div>'+
+        '<div class="sigs"><div class="sig"><div class="sn">Aryeh Samuelson</div><div class="rn2">Aryeh Samuelson</div><div class="ro">Director of Staff Training</div></div>'+
+        '<div class="sig"><div class="sn">Avi Sacks</div><div class="rn2">Avi Sacks</div><div class="ro">Chief Operating Officer</div></div></div></div>';
       document.getElementById('overlay').classList.add('show');
     }
     function closeCert(){ document.getElementById('overlay').classList.remove('show'); }
