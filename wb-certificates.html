@@ -139,9 +139,9 @@
             bodyT += '<tr><td>'+esc(r.dsp_name)+arch+'</td><td>'+fmtDate(r.completed_at)+'</td><td>'+esc(r.score)+'</td><td>'+result+'</td><td><div class="act"><button class="mini view" onclick="viewCert(\''+r.id+'\')">View</button><button class="mini del" onclick="delRecord(\''+r.id+'\')">Delete</button></div></td></tr>';
           });
           bodyT += '</tbody></table>';
-          trHtml += '<div class="ts open"><div class="th" onclick="this.parentNode.classList.toggle(\'open\')"><span class="chev">&#9654;</span><span class="tt">'+esc(tr)+'</span><span class="tcount">'+list.length+'</span></div><div class="tb">'+bodyT+'</div></div>';
+          trHtml += '<div class="ts"><div class="th" onclick="this.parentNode.classList.toggle(\'open\')"><span class="chev">&#9654;</span><span class="tt">'+esc(tr)+'</span><span class="tcount">'+list.length+'</span></div><div class="tb">'+bodyT+'</div></div>';
         });
-        html += '<div class="rc open"><div class="rh" onclick="this.parentNode.classList.toggle(\'open\')"><span class="chev">&#9654;</span><span class="rn">'+esc(res)+'</span><span class="tcount">'+totalCount+' certificates</span></div><div class="rb">'+trHtml+'</div></div>';
+        html += '<div class="rc"><div class="rh" onclick="this.parentNode.classList.toggle(\'open\')"><span class="chev">&#9654;</span><span class="rn">'+esc(res)+'</span><span class="tcount">'+totalCount+' certificates</span></div><div class="rb">'+trHtml+'</div></div>';
       });
       if(rows.length===0) html = '<div class="loading">No certificates match.</div>';
       document.getElementById('cnt').innerHTML = html;
