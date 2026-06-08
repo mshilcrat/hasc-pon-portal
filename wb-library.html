@@ -55,8 +55,8 @@ html,body{margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,BlinkM
 #hM .sr:last-child{border-bottom:none;}
 #hM .sr.hide{display:none;}
 #hM .sn{font-size:13px;font-weight:500;flex:1;min-width:90px;}
-#hM .sro{font-size:11px;color:#8a9ab0;width:100px;flex-shrink:0;}
-#hM .sb2{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;flex-shrink:0;width:76px;text-align:center;}
+#hM .sro{font-size:11px;color:#8a9ab0;width:120px;flex-shrink:0;}
+#hM .sb2{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;flex-shrink:0;width:60px;text-align:center;}
 #hM .sb2.portal{background:#e0f5f6;color:#1a8c94;}
 #hM .sb2.missing{background:#ffebee;color:#c62828;}
 #hM .sd{font-size:11px;color:#8a9ab0;width:90px;flex-shrink:0;}
@@ -67,7 +67,7 @@ html,body{margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,BlinkM
 </style>
 </head>
 <body>
-<div id="hM"><div class="hdr"><div style="display:flex;align-items:center"><div class="logo-wrap"><svg width="132" height="34" viewBox="0 0 132 34" xmlns="http://www.w3.org/2000/svg" style="display:block"><rect x="0" y="2" width="13" height="13" rx="1" fill="#F5C518"/><rect x="0" y="18" width="13" height="13" rx="1" fill="#3FC1C9"/><path d="M17 15 L23.5 2 L30 15 Z" fill="#F5C518"/><path d="M30 26 a6.5 6.5 0 1 1 0 -9 l-2.2 2.6 a3 3 0 1 0 0 3.8 Z" fill="#3FC1C9"/><text x="40" y="15" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="800" fill="#3FC1C9" letter-spacing="0.5">HASC</text><text x="40" y="29" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="800" fill="#3FC1C9" letter-spacing="0.5">CENTER</text></svg></div><span class="lib-sub">Training Library</span></div><div class="rsw"><span class="rlab">Live data \u00b7 read-only</span></div></div><div class="tbar"><div class="sbox"><span class="si">\ud83d\udd0d</span><input type="text" id="hascSearch" placeholder="Search staff name\u2026"></div><div class="fgrp"><button class="fbtn active" data-f="all">All</button><button class="fbtn" data-f="pass">Passed</button><button class="fbtn miss" data-f="fail">Failed \u26a0</button></div></div><div class="sumb" id="hascSum"></div><div class="cnt" id="hascCnt"><div class="loading">Loading live training records\u2026</div></div></div>
+<div id="hM"><div class="hdr"><div style="display:flex;align-items:center"><div class="logo-wrap"><svg width="132" height="34" viewBox="0 0 132 34" xmlns="http://www.w3.org/2000/svg" style="display:block"><rect x="0" y="2" width="13" height="13" rx="1" fill="#F5C518"/><rect x="0" y="18" width="13" height="13" rx="1" fill="#3FC1C9"/><path d="M17 15 L23.5 2 L30 15 Z" fill="#F5C518"/><path d="M30 26 a6.5 6.5 0 1 1 0 -9 l-2.2 2.6 a3 3 0 1 0 0 3.8 Z" fill="#3FC1C9"/><text x="40" y="15" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="800" fill="#3FC1C9" letter-spacing="0.5">HASC</text><text x="40" y="29" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="800" fill="#3FC1C9" letter-spacing="0.5">CENTER</text></svg></div><span class="lib-sub">Training Library</span></div><div class="rsw"><span class="rlab">Live data · read-only</span></div></div><div class="tbar"><div class="sbox"><span class="si">🔍</span><input type="text" id="hascSearch" placeholder="Search staff name…"></div><div class="fgrp"><button class="fbtn active" data-f="all">All</button><button class="fbtn" data-f="pass">Passed</button><button class="fbtn miss" data-f="fail">Failed ⚠</button></div></div><div class="sumb" id="hascSum"></div><div class="cnt" id="hascCnt"><div class="loading">Loading live training records…</div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="wb-config.js"></script>
 <script>
@@ -78,17 +78,18 @@ var sb=window.supabase.createClient(window.HASC_CONFIG.SUPABASE_URL, window.HASC
 function groupCerts(rows){
   var byRes={};
   rows.forEach(function(c){
+    if(c.is_archived===true) return;
     var res=(c.residence||"(No residence)").toString().trim();
-    var title=(c.individual_name?("Individual: "+c.individual_name):(c.org||"Training")).toString().trim();
+    var title=(c.individual_name?("Individual: "+c.individual_name):"General Training").toString().trim();
     if(!byRes[res]) byRes[res]={name:res,trainings:{}};
     if(!byRes[res].trainings[title]) byRes[res].trainings[title]={id:res+"|"+title,title:title,staff:[]};
     var status=(c.passed===true||c.passed==="true")?"pass":"fail";
     byRes[res].trainings[title].staff.push({
-      name:c.dsp_name||c.nurse_email||"\u2014",
-      role:c.dsp_title||"\u2014",
+      name:c.dsp_name||c.nurse_email||"—",
+      role:c.dsp_title||"—",
       status:status,
-      date:c.completed_at?new Date(c.completed_at).toLocaleDateString():"\u2014",
-      score:(c.score!=null?c.score:"\u2014")
+      date:c.completed_at?new Date(c.completed_at).toLocaleDateString():"—",
+      score:(c.score!=null?c.score:"—")
     });
   });
   return Object.keys(byRes).sort().map(function(rk){
@@ -100,24 +101,24 @@ function stats(res){var p=0,m=0;res.trainings.forEach(function(t){t.staff.forEac
 function hbar(s){if(!s.tot)return"";var pct=function(v){return Math.round(v/s.tot*100)};return "<div class=\"hb\">"+(s.p?"<div class=\"hs p\" style=\"width:"+pct(s.p)+"%\"></div>":"")+(s.m?"<div class=\"hs m\" style=\"width:"+pct(s.m)+"%\"></div>":"")+"</div>";}
 function renderCard(res){
   var s=stats(res);
-  var chip=s.m>0?"<span class=\"cmiss\">\u26a0 "+s.m+" failed</span>":"<span class=\"cok\">\u2713 All passed</span>";
+  var chip=s.m>0?"<span class=\"cmiss\">⚠ "+s.m+" failed</span>":"<span class=\"cok\">✓ All passed</span>";
   var trHTML=res.trainings.map(function(t){
     var tp=t.staff.filter(function(x){return x.status==="pass"}).length;
     var tm=t.staff.filter(function(x){return x.status==="fail"}).length;
     var tot=tp+tm;
     var mb=tot?"<div class=\"mb\">"+(tp?"<div class=\"hs p\" style=\"width:"+Math.round(tp/tot*100)+"%\"></div>":"")+(tm?"<div class=\"hs m\" style=\"width:"+Math.round(tm/tot*100)+"%\"></div>":"")+"</div>":"";
     var rows=t.staff.map(function(sf){
-      var cert=sf.status==="pass"?"<span class=\"cert\">\ud83d\udcc4 "+sf.score+"</span>":"<span class=\"ncert\">"+sf.score+"</span>";
+      var cert=sf.status==="pass"?"<span class=\"cert\">📄 "+sf.score+"</span>":"<span class=\"ncert\">"+sf.score+"</span>";
       return "<div class=\"sr\" data-nm=\""+(sf.name||"").toString().toLowerCase()+"\" data-st=\""+sf.status+"\"><div class=\"sn\">"+sf.name+"</div><div class=\"sro\">"+sf.role+"</div><div class=\"sb2 "+(sf.status==="pass"?"portal":"missing")+"\">"+(sf.status==="pass"?"Pass":"Fail")+"</div><div class=\"sd\">"+sf.date+"</div>"+cert+"</div>";
     }).join("");
-    return "<div class=\"ts\" data-tid=\""+t.id+"\"><div class=\"th\"><span class=\"tchev\">\u25b6</span><div class=\"tt\">"+t.title+"</div>"+mb+(tm?"<span style=\"font-size:11px;color:#e53935;font-weight:700;\">"+tm+" failed</span>":"")+"</div><div class=\"stab\"><div class=\"ch\"><div style=\"flex:1\">DSP Name</div><div style=\"width:100px\">Role</div><div style=\"width:76px\">Status</div><div style=\"width:90px\">Date</div><div>Score</div></div>"+rows+"</div></div>";
+    return "<div class=\"ts\" data-tid=\""+t.id+"\"><div class=\"th\"><span class=\"tchev\">▶</span><div class=\"tt\">"+t.title+"</div>"+mb+(tm?"<span style=\"font-size:11px;color:#e53935;font-weight:700;\">"+tm+" failed</span>":"")+"</div><div class=\"stab\"><div class=\"ch\"><div style=\"flex:1\">DSP Name</div><div style=\"width:120px\">Role</div><div style=\"width:60px\">Status</div><div style=\"width:90px\">Date</div><div>Score</div></div>"+rows+"</div></div>";
   }).join("");
-  return "<div class=\"rc\" data-rid=\""+res.id+"\"><div class=\"rh\"><span class=\"chev\">\u25b6</span><div class=\"rn\">"+res.name+"</div>"+hbar(s)+chip+"</div><div class=\"rb\">"+trHTML+"</div></div>";
+  return "<div class=\"rc\" data-rid=\""+res.id+"\"><div class=\"rh\"><span class=\"chev\">▶</span><div class=\"rn\">"+res.name+"</div>"+hbar(s)+chip+"</div><div class=\"rb\">"+trHTML+"</div></div>";
 }
 function render(){
   var cnt=document.getElementById("hascCnt");
   if(!DATA.length){cnt.innerHTML="<div class=\"loading\">No training records found.</div>";updateSummary();return;}
-  var html="<div class=\"sec-label\">\ud83c\udfe0 Residence Trainings</div>";
+  var html="<div class=\"sec-label\">🏠 Residence Trainings</div>";
   DATA.forEach(function(res){html+=renderCard(res);});
   cnt.innerHTML=html;bindCards();applyFilters();
 }
@@ -133,7 +134,7 @@ function applyFilters(){
 }
 function updateSummary(){
   var tm=0,tt=0;DATA.forEach(function(r){var s=stats(r);tm+=s.m;tt+=s.tot;});
-  document.getElementById("hascSum").innerHTML="<span class=\"sumc\">"+DATA.length+" residence"+(DATA.length!==1?"s":"")+" \u00b7 "+tt+" training records</span>"+(tm>0?"<span class=\"badge red\">\u26a0 "+tm+" failed</span>":"<span class=\"badge green\">\u2713 All passed</span>");
+  document.getElementById("hascSum").innerHTML="<span class=\"sumc\">"+DATA.length+" residence"+(DATA.length!==1?"s":"")+" · "+tt+" training records</span>"+(tm>0?"<span class=\"badge red\">⚠ "+tm+" failed</span>":"<span class=\"badge green\">✓ All passed</span>");
 }
 function bindCards(){
   ov.querySelectorAll(".rh").forEach(function(h){h.onclick=function(){h.parentNode.classList.toggle("open");};});
@@ -143,7 +144,7 @@ ov.querySelectorAll(".fbtn").forEach(function(b){b.onclick=function(){state.filt
 document.getElementById("hascSearch").oninput=function(e){state.search=e.target.value;applyFilters();};
 (async function load(){
   try{
-    var resp=await sb.from('certificates').select('residence,dsp_name,dsp_title,individual_name,org,score,passed,completed_at,nurse_email').order('completed_at',{ascending:false});
+    var resp=await sb.from("certificates").select("residence,dsp_name,dsp_title,individual_name,score,passed,completed_at,nurse_email,is_archived").order("completed_at",{ascending:false});
     if(resp.error){document.getElementById("hascCnt").innerHTML="<div class=\"errbox\">Could not load data: "+resp.error.message+"</div>";return;}
     DATA=groupCerts(resp.data||[]);
     render();
