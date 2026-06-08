@@ -129,7 +129,7 @@ ponUrl=sb.storage.from('pon-docs').getPublicUrl(path).data.publicUrl;
     const opts=[...qcards[n].querySelectorAll('.optin')].map(i=>i.value.trim());
     const correctEl=qcards[n].querySelector('input[type=radio]:checked');
     if(!qt||opts.some(o=>!o)||!correctEl){msg.textContent='Please complete all 5 questions (text, 4 options, and a correct answer).';return;}
-    questions.push({question:qt,options:opts,correct:parseInt(correctEl.value,10)});
+    questions.push({question:qt,optionA:opts[0],optionB:opts[1],optionC:opts[2],optionD:opts[3],correctOption:['A','B','C','D'][parseInt(correctEl.value,10)],options:opts,correct:parseInt(correctEl.value,10)});
   }
   const tok=token();
   const payload={
