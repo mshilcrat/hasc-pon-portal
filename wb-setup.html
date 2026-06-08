@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HASC – Setup Training</title>
+<title>HASC â Setup Training</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="wb-config.js"></script>
 <style>
@@ -51,17 +51,17 @@
 <div id="app">
   <div class="topbar"><div class="hdr">
     <img src="hasc-logo.png" alt="HASC Center">
-    <div class="right"><a href="javascript:history.back()" class="btn-signout" style="text-decoration:none;color:#2b3a45;display:inline-block">← Back</a><a href="index.html" class="btn-signout" style="text-decoration:none;color:#2b3a45;display:inline-block">🏠 Home</a><span class="uname" id="uname">…</span><button class="btn-signout" id="signout">Sign Out</button></div>
+    <div class="right"><a href="javascript:history.back()" class="btn-signout" style="text-decoration:none;color:#2b3a45;display:inline-block">â Back</a><a href="index.html" class="btn-signout" style="text-decoration:none;color:#2b3a45;display:inline-block">ð  Home</a><span class="uname" id="uname">â¦</span><button class="btn-signout" id="signout">Sign Out</button></div>
   </div></div>
   <div class="wrap">
     <div class="tabs">
-      <a class='tab active' href='/wb-setup'>📋 Setup Training</a>
-      <a class='tab' href='/wb-library'>📚 Training Library</a>
-      <a class='tab' href='/wb-certificates'>🏆 Certificates</a>
-      <a class='tab' href='/wb-questions'>💬 Questions</a>
+      <a class='tab active' href='/wb-setup'>ð Setup Training</a>
+      <a class='tab' href='/wb-library'>ð Training Library</a>
+      <a class='tab' href='/wb-certificates'>ð Certificates</a>
+      <a class='tab' href='/wb-questions'>ð¬ Questions</a>
     </div>
     <div class="card">
-      <div class="h1">📋 Create Training Session</div>
+      <div class="h1">ð Create Training Session</div>
       <label class="fld">Training Title *</label>
       <input class="in" id="title" placeholder="e.g. Diabetes Care">
       <label class="fld">Training Type</label>
@@ -75,13 +75,13 @@
       <label class="fld">PON Training Document (optional)</label>
       <div class="filebox"><input type="file" id="pon"></div>
       <div class="qbox"><h2>Quiz Questions (5 Required)</h2><div id="questions"></div></div>
-      <button class="submit" id="create">✅ Create Session &amp; Generate Link</button>
+      <button class="submit" id="create">â Create Session &amp; Generate Link</button>
       <div id="msg"></div>
       <div id="linkout"></div>
     </div>
   </div>
 </div>
-<div id="devToggle">🖥️ PC</div>
+<div id="devToggle">ð¥ï¸ PC</div>
 <script>
 const sb = supabase.createClient(HASC_CONFIG.SUPABASE_URL, HASC_CONFIG.SUPABASE_ANON_KEY);
 const RESIDENCES=["1068 East 14th Street","1503 East 14th Street","19th Avenue - 4801","46th Street - 1327","46th Street - 1771 1st Fl","46th Street - 1771 2nd Fl","48th Street - 1268","50th Street - 918","53rd Street - 1038","Avenue H - 824","Avenue I - 2802","Avenue J - 1010","Avenue J - 1014 6B","Avenue J - 1014 6F","Avenue K - 1010","Avenue L - 1122","Avenue S","Bedford Avenue - 3245","Coney Island Ave - 2173","Crown Heights - 580","Ditmas Avenue - 804","East 13th Street - 1857","East 21 - 2102 Ave I","East 35th St - 1431","East 36th Street - 3521","East 7th Street (Ave N)","East 8th Street - 536","East 9th - 1367","Kings Highway - 2416","Mill Basin","Montgomery St (fmr Kingston Ave)","New York Avenue","Staten Island","Webster Avenue - 373","Other"];
@@ -99,7 +99,7 @@ for(let n=1;n<=5;n++){
   qWrap.appendChild(c);
 }
 const dt=document.getElementById('devToggle');let mob=false;
-dt.onclick=()=>{mob=!mob;document.body.classList.toggle('mobile',mob);dt.innerHTML=mob?'📱 Mobile':'🖥️ PC';window.scrollTo(0,0);};
+dt.onclick=()=>{mob=!mob;document.body.classList.toggle('mobile',mob);dt.innerHTML=mob?'ð± Mobile':'ð¥ï¸ PC';window.scrollTo(0,0);};
 let CURRENT_USER=null;
 sb.auth.getUser().then(({data})=>{CURRENT_USER=data&&data.user;document.getElementById('uname').textContent=CURRENT_USER?(CURRENT_USER.email||'Signed in'):'Not signed in';});
 document.getElementById('signout').onclick=async()=>{await sb.auth.signOut();location.href='wb-login.html';};
@@ -134,7 +134,7 @@ ponUrl=sb.storage.from('pon-docs').getPublicUrl(path).data.publicUrl;
   const tok=token();
   const payload={
     description:title,
-    individual_name:isIndividual?indName:null,
+    individual_name:isIndividual?indName:title,
     residence:residence,
     video_url:video,document_url:ponUrl,
     questions:questions,
@@ -143,9 +143,9 @@ ponUrl=sb.storage.from('pon-docs').getPublicUrl(path).data.publicUrl;
     nurse_name:CURRENT_USER?(CURRENT_USER.email||''):null,
     expires_at:new Date(Date.now()+1000*60*60*24*90).toISOString()
   };
-  const create=document.getElementById('create');create.disabled=true;create.textContent='Creating…';
+  const create=document.getElementById('create');create.disabled=true;create.textContent='Creatingâ¦';
   const {data,error}=await sb.from('training_sessions').insert(payload).select().single();
-  create.disabled=false;create.innerHTML='✅ Create Session &amp; Generate Link';
+  create.disabled=false;create.innerHTML='â Create Session &amp; Generate Link';
   if(error){msg.style.color='#c0392b';msg.textContent='Error: '+error.message;return;}
   msg.style.color='#16a37a';msg.textContent='Session created.';
   const link=location.origin+'/index.html?session='+encodeURIComponent(tok);
