@@ -139,7 +139,7 @@
             bodyT += '<tr><td>'+esc(r.dsp_name)+arch+'</td><td>'+fmtDate(r.completed_at)+'</td><td>'+esc(r.score)+'</td><td>'+result+'</td><td><div class="act"><button class="mini view" onclick="viewCert(\''+r.id+'\')">View</button><button class="mini del" onclick="delRecord(\''+r.id+'\')">Delete</button></div></td></tr>';
           });
           bodyT += '</tbody></table>';
-          trHtml += '<div class="ts"><div class="th" onclick="this.parentNode.classList.toggle(\'open\')"><span class="chev">&#9654;</span><span class="tt">'+esc(tr)+'</span><span class="tcount">'+list.length+'</span></div><div class="tb">'+bodyT+'</div></div>';
+          trHtml += '<div class="ts"><div class="th" onclick="this.parentNode.classList.toggle(\'open\')"><span class="chev">&#9654;</span><span class="tt">'+(list[0]&&list[0].certificate?esc(list[0].certificate)+' - ':'')+esc(tr)+'</span><span class="tcount">'+list.length+'</span></div><div class="tb">'+bodyT+'</div></div>';
         });
         html += '<div class="rc"><div class="rh" onclick="this.parentNode.classList.toggle(\'open\')"><span class="chev">&#9654;</span><span class="rn">'+esc(res)+'</span><span class="tcount">'+totalCount+' certificates</span></div><div class="rb">'+trHtml+'</div></div>';
       });
@@ -155,7 +155,7 @@
         '<div class="inner"><h1>CERTIFICATE</h1><div class="oc">OF TRAINING COMPLETION</div>'+
         '<img src="hasc-logo.png" class="logo" alt="HASC Center"><div class="ct">This certifies that</div>'+
         '<div class="nm">'+esc(r.dsp_name)+'</div>'+
-        '<div class="cbody">has successfully completed the '+esc(r.individual_name||'training')+' &middot; '+fmtDate(r.completed_at)+' &middot; HASC Center training for '+esc(r.residence)+'.<br>Certificate ID: '+shortId+'.<br>Final Result: '+(r.passed?'Pass':'Fail')+'.</div>'+
+        '<div class="cbody">has successfully completed the '+esc(r.individual_name||'training')+(r.certificate?' for the care of '+esc(r.certificate):'')+' &middot; '+fmtDate(r.completed_at)+' &middot; HASC Center training for '+esc(r.residence)+'.<br>Certificate ID: '+shortId+'.<br>Final Result: '+(r.passed?'Pass':'Fail')+'.</div>'+
         '<div class="sigs"><div class="sig"><div class="sn">Aryeh Samuelson</div><div class="rn2">Aryeh Samuelson</div><div class="ro">Director of Staff Training</div></div>'+
         '<div class="sig"><div class="sn">Avi Sacks</div><div class="rn2">Avi Sacks</div><div class="ro">Chief Operating Officer</div></div></div></div>';
       document.getElementById('overlay').classList.add('show');
