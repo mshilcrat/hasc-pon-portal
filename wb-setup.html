@@ -36,10 +36,10 @@
   .qcard .qt{font-weight:800;font-size:16px;margin-bottom:12px}
   .opt{display:flex;gap:12px;align-items:center;margin-bottom:10px}
   .opt input.optin{flex:1;min-width:0;box-sizing:border-box;padding:11px 12px;border:1px solid #d6dce2;border-radius:9px;font-size:14px;margin:0}
-  .opt label{display:flex;align-items:center;gap:6px;color:#16a37a;font-size:13px;font-weight:600;white-space:nowrap}
+  .opt label{display:flex;align-items:center;gap:6px;color:#1296a6;font-size:13px;font-weight:600;white-space:nowrap}
   .submit{width:100%;margin-top:24px;padding:14px;border:none;border-radius:10px;background:#16b3c6;color:#fff;font-weight:800;font-size:16px;cursor:pointer}
   #devToggle{position:fixed;bottom:20px;right:20px;background:#fff;border:1px solid #d6dce2;border-radius:22px;box-shadow:0 3px 12px rgba(0,0,0,.18);padding:9px 18px;font-weight:700;font-size:14px;cursor:pointer;z-index:50}
-  #linkout{display:none;background:#eafaf4;border:1px solid #b8e8d6;border-radius:10px;padding:14px;margin-top:18px;font-size:14px;word-break:break-all}
+  #linkout{display:none;background:#eafaf4;border:1px solid #9fe3ec;border-radius:10px;padding:14px;margin-top:18px;font-size:14px;word-break:break-all}
   #msg{margin-top:14px;font-size:14px}
   body.mobile #app{max-width:412px;box-shadow:0 0 0 1px #c6cfd6}
   body.mobile .hdr{flex-direction:column;align-items:flex-start;gap:10px}
@@ -147,7 +147,7 @@ ponUrl=sb.storage.from('pon-docs').getPublicUrl(path).data.publicUrl;
   const {data,error}=await sb.from('training_sessions').insert(payload).select().single();
   create.disabled=false;create.innerHTML='✅ Create Session &amp; Generate Link';
   if(error){msg.style.color='#c0392b';msg.textContent='Error: '+error.message;return;}
-  msg.style.color='#16a37a';msg.textContent='Session created.';
+  msg.style.color='#1296a6';msg.textContent='Session created.';
   const link=location.origin+'/dsp-training.html?token='+encodeURIComponent(tok);
   const lo=document.getElementById('linkout');lo.style.display='block';
   lo.innerHTML='<b>Training link</b><br><a href="'+link+'" target="_blank">'+link+'</a> <button id="copyLink" type="button" style="margin-left:8px;padding:6px 12px;border:1px solid #16b3c6;background:#16b3c6;color:#fff;border-radius:8px;cursor:pointer;font-size:13px">Copy Link</button>';document.getElementById('copyLink').onclick=function(){navigator.clipboard.writeText(link).then(function(){var b=document.getElementById('copyLink');b.textContent='Copied!';setTimeout(function(){b.textContent='Copy Link';},1500);});};
