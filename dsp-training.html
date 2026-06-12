@@ -8,58 +8,58 @@
   <style>
   *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;min-height:100vh}
-.header{background:#fff;border-bottom:3px solid #00b4a0;padding:10px 24px;display:flex;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.header{background:#fff;border-bottom:3px solid #16b3c6;padding:10px 24px;display:flex;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .container{max-width:800px;margin:32px auto;padding:0 16px}
 .card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:32px;margin-bottom:24px}
 .card h2{font-size:1.2rem;font-weight:700;margin-bottom:16px;color:#hf1a202c}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:8px;font-weight:600;font-size:.95rem;cursor:pointer;border:none;transition:all .2s}
-.btn-primary{background:#00b4a0;color:#fff}.btn-primary:hover{background:#009688}
-.btn-success{background:#059669;color:#fff}.btn-success:hover{background:#047857}
+.btn-primary{background:#16b3c6;color:#fff}.btn-primary:hover{background:#1296a6}
+.btn-success{background:#16b3c6;color:#fff}.btn-success:hover{background:#1296a6}
 .btn-secondary{background:#f3f4f6;color:#374151;border:1px solid #d1d5db}
   .alert{padding:12px 16px;border-radius:8px;font-size:.9rem;margin-bottom:16px}
 .alert-error{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626}
-.alert-success{background:#f0fdf4;border:1px solid #86efac;color:#15803d}
+.alert-success{background:#f0f9ff;border:1px solid #9fe3ec;color:#1296a6}
   .alert-info{background:#eff6ff;border:1px solid #93c5fd;color:#1d4ed8}
   .form-group{margin-bottom:16px}
   .form-group label{display:block;font-weight:600;font-size:.88rem;margin-bottom:6px;color:#374151}
 .form-group input,.form-group select{width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:.95rem;outline:none;transition:border .2s}
-  .form-group input:focus,.form-group select:focus{border-color:#00b4a0}
+  .form-group input:focus,.form-group select:focus{border-color:#16b3c6}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:600px){.two-col{grid-template-columns:1fr}}
 .steps{display:flex;align-items:center;justify-content:center;margin-bottom:28px;flex-wrap:wrap;gap:4px}
 .step{display:flex;align-items:center;gap:6px}
 .step-num{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;background:#e5e7eb;color:#6b7280}
 .step-label{font-size:.8rem;color:#6b7280;font-weight:600}
-.step.active .step-num{background:#00b4a0;color:#fff}.step.active .step-label{color:#00b4a0}
-.step.done .step-num{background:#059669;color:#fff}.step.done .step-label{color:#059669}
+.step.active .step-num{background:#16b3c6;color:#fff}.step.active .step-label{color:#16b3c6}
+.step.done .step-num{background:#16b3c6;color:#fff}.step.done .step-label{color:#16b3c6}
 .step-line{width:32px;height:2px;background:#e5e7eb;margin:0 2px}
 .video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;background:#000;margin-bottom:20px}
 .video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
 .quiz-option{display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px solid #e5e7eb;border-radius:8px;cursor:pointer;margin-bottom:8px;transition:all .2s}
-.quiz-option:hover{border-color:#00b4a0;background:#f0f9ff}
-.quiz-option.selected{border-color:#00b4a0;background:#eff6ff}
-.quiz-option.correct{border-color:#059669;background:#f0fdf4;pointer-events:none}
+.quiz-option:hover{border-color:#16b3c6;background:#f0f9ff}
+.quiz-option.selected{border-color:#16b3c6;background:#eff6ff}
+.quiz-option.correct{border-color:#16b3c6;background:#f0f9ff;pointer-events:none}
 .quiz-option.wrong{border-color:#dc2626;background:#fef2f2;pointer-events:none}
 .opt-letter{font-weight:700;color:#6b7280;min-width:22px}
 .question-block{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:18px;margin-bottom:16px}
 .question-block h4{font-size:.95rem;font-weight:700;margin-bottom:12px;color:#374151}
 .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.82rem;font-weight:700}
-.badge-pass{background:#d1fae5;color:#065f46}.badge-fail{background:#fee2e2;color:#991b1b}
-.cert-box{background:linear-gradient(135deg,#f0f9ff,#e0f7fa);border:3px solid #00b4a0;border-radius:16px;padding:36px;text-align:center;max-width:520px;margin:0 auto}
-.cert-title{font-size:1.5rem;font-weight:800;color:#00b4a0;margin-bottom:4px}
+.badge-pass{background:#e0f7fa;color:#0e7d8c}.badge-fail{background:#fee2e2;color:#991b1b}
+.cert-box{background:linear-gradient(135deg,#f0f9ff,#e0f7fa);border:3px solid #16b3c6;border-radius:16px;padding:36px;text-align:center;max-width:520px;margin:0 auto}
+.cert-title{font-size:1.5rem;font-weight:800;color:#16b3c6;margin-bottom:4px}
 .cert-org{font-size:.88rem;color:#6b7280;margin-bottom:14px}
-  .cert-name{font-size:1.4rem;font-weight:800;color:#1a202c;border-bottom:2px solid #00b4a0;padding-bottom:8px;margin-bottom:10px}
+  .cert-name{font-size:1.4rem;font-weight:800;color:#1a202c;border-bottom:2px solid #16b3c6;padding-bottom:8px;margin-bottom:10px}
 .cert-detail{font-size:.9rem;color:#374151;margin-bottom:4px}
-.cert-score{font-size:1.05rem;font-weight:700;color:#00b4a0;margin-top:10px}
-.spinner{display:inline-block;width:18px;height:18px;border:3px solid #e5e7eb;border-top-color:#00b4a0;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+.cert-score{font-size:1.05rem;font-weight:700;color:#16b3c6;margin-top:10px}
+.spinner{display:inline-block;width:18px;height:18px;border:3px solid #e5e7eb;border-top-color:#16b3c6;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
   #loading-screen{text-align:center;padding:80px 20px}
-  #loading-screen .big-spinner{width:48px;height:48px;border:5px solid #e5e7eb;border-top-color:#00b4a0;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+  #loading-screen .big-spinner{width:48px;height:48px;border:5px solid #e5e7eb;border-top-color:#16b3c6;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
   </style>
   </head>
   <body>
   <div class="header">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" height="40" style="display:block"><rect x="0" y="2" width="22" height="22" fill="#00b4a0"/><polygon points="26,24 48,24 37,2" fill="#F5C518"/><circle cx="11" cy="39" r="11" fill="#F5C518"/><path d="M 37,28 A 11,11 0 0,0 37,50 Z" fill="#00b4a0"/><rect x="37" y="28" width="11" height="22" fill="#00b4a0"/><text x="56" y="26" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">HASC</text><text x="56" y="50" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#00b4a0" letter-spacing="1">CENTER</text></svg>
+  <img src="hasc-logo.png" alt="HASC Center" height="40" style="display:block">
   <span style="margin-left:16px;font-size:1rem;font-weight:700;color:#374151">Staff Training</span>
   </div>
 
@@ -144,7 +144,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;mi
         <p style="color:#6b7280;margin-bottom:8px;">Before taking the quiz, do you have any questions about the training video for the nurse?</p>
         <div id="q-choice" style="display:flex;gap:16px;margin-top:24px;justify-content:center;flex-wrap:wrap;">
           <button onclick="showQuestionsForm()" style="flex:1;min-width:180px;max-width:260px;padding:28px 20px;border-radius:14px;font-size:1.05rem;font-weight:700;cursor:pointer;border:2px solid #f59e0b;background:#fff8f0;color:#92400e;display:flex;flex-direction:column;align-items:center;gap:10px;"><span style="font-size:2.5rem;">🙋</span><span>Yes, I have questions</span></button>
-          <button onclick="proceedToQuiz()" style="flex:1;min-width:180px;max-width:260px;padding:28px 20px;border-radius:14px;font-size:1.05rem;font-weight:700;cursor:pointer;border:2px solid #10b981;background:#f0fdf4;color:#065f46;display:flex;flex-direction:column;align-items:center;gap:10px;"><span style="font-size:2.5rem;">✅</span><span>No, I'm ready for the quiz</span></button>
+          <button onclick="proceedToQuiz()" style="flex:1;min-width:180px;max-width:260px;padding:28px 20px;border-radius:14px;font-size:1.05rem;font-weight:700;cursor:pointer;border:2px solid #16b3c6;background:#f0f9ff;color:#0e7d8c;display:flex;flex-direction:column;align-items:center;gap:10px;"><span style="font-size:2.5rem;">✅</span><span>No, I'm ready for the quiz</span></button>
         </div>
         <div id="q-form" style="display:none;margin-top:24px;">
           <hr style="margin:24px 0;border-color:#e5e7eb;">
@@ -156,7 +156,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;mi
         </div>
         <div id="q-submitted" style="display:none;text-align:center;padding:20px;">
           <div style="font-size:3rem;margin-bottom:12px;">📤</div>
-          <h3 style="font-weight:700;margin-bottom:8px;color:#065f46;">Questions Submitted!</h3>
+          <h3 style="font-weight:700;margin-bottom:8px;color:#0e7d8c;">Questions Submitted!</h3>
           <p style="color:#6b7280;margin-bottom:20px;">A nurse will call you back at your number. You can now take the quiz.</p>
           <button class="btn btn-primary" onclick="proceedToQuiz()">📝 Continue to Quiz →</button>
         </div>
@@ -233,7 +233,7 @@ function getVideoEmbed(url){
   const vmMatch=url.match(/vimeo\.com\/(\d+)/);
   if(vmMatch) return `<iframe src="https://player.vimeo.com/video/${vmMatch[1]}" allowfullscreen></iframe>`;
   // Fallback: direct link
-  return `<div style="padding:20px;color:#6b7280;text-align:center"><a href="${url}" target="_blank" style="color:#00b4a0;font-weight:600">▶ Open Training Video</a></div>`;
+  return `<div style="padding:20px;color:#6b7280;text-align:center"><a href="${url}" target="_blank" style="color:#16b3c6;font-weight:600">▶ Open Training Video</a></div>`;
 }
 
 async function loadSession(){
@@ -314,7 +314,8 @@ async function submitQuiz(){
   const{error}=await sb.from('certificates').insert({
     nurse_email:sessionData.nurse_email,
     residence:sessionData.residence,
-    individual_name:sessionData.individual_name,
+    individual_name:sessionData.description,
+    certificate:(sessionData.individual_name!==sessionData.description)?sessionData.individual_name:null,
     dsp_name:dspName,
     
     score:score,
@@ -350,7 +351,7 @@ async function submitQuiz(){
       <div class="cert-detail" style="margin-top:8px;color:#9ca3af;font-size:.8rem">Completed: ${dateStr}</div>
       <div class="badge ${passed?'badge-pass':'badge-fail'}" style="margin-top:12px">${passed?'✅ PASSED':'❌ FAILED'}</div>
     </div>
-    <button class="btn btn-primary" style="width:100%;margin-top:20px" onclick="window.print()">🖨️ Print Certificate</button>
+    <div style="width:100%;margin-top:20px;text-align:center;color:#374151;font-size:.95rem">✓ Saved — your certificate is on file. No action needed.</div>
   `;
   showStep('step-cert');
 }
@@ -365,7 +366,7 @@ document.addEventListener('DOMContentLoaded',loadSession);
 </script>
   <!-- View mode toggle: Phone / PC / Auto -->
   <style id="hasc-view-toggle-style">
-    html.hasc-framed body{background:radial-gradient(120% 80% at 50% 0%, #15545d 0%, #0c2b30 70%) !important;min-height:100vh;}
+    html.hasc-framed body{background:#f4f6f9 !important;min-height:100vh;}
     html.hasc-framed body > *:not(#hasc-view-toggle-btn){max-width:440px !important;margin-left:auto !important;margin-right:auto !important;}
     #hasc-view-toggle-btn{position:fixed;bottom:14px;right:14px;z-index:2147483600;display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;border:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.96);box-shadow:0 6px 18px rgba(0,0,0,.22);font-size:12.5px;font-weight:600;color:#1a202c;cursor:pointer;font-family:inherit;}
     /* Fit the embedded training document inside the narrow phone frame */
