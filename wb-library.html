@@ -67,7 +67,7 @@ html,body{margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,BlinkM
 </style>
 </head>
 <body>
-<div id="hM"><div class="hdr"><div style="display:flex;align-items:center"><div class="logo-wrap"><img src="hasc-logo.png" alt="HASC Center" style="height:38px;display:block"></div><span class="lib-sub">Training Library</span><a href="javascript:history.back()" style="margin-left:auto;text-decoration:none;border:1px solid #d6dce2;background:#fff;border-radius:7px;padding:7px 14px;font-size:13px;color:#2b3a45">â Back</a><a href="index.html" style="margin-left:8px;text-decoration:none;border:1px solid #d6dce2;background:#fff;border-radius:7px;padding:7px 14px;font-size:13px;color:#2b3a45">ð  Home</a></div><div class="rsw"><span class="rlab">Live data Â· read-only</span></div></div><div class="tbar"><div class="sbox"><span class="si">ð</span><input type="text" id="hascSearch" placeholder="Search staff nameâ¦"></div><div class="fgrp"><button class="fbtn active" data-f="all">All</button><button class="fbtn" data-f="pass">Passed</button><button class="fbtn miss" data-f="fail">Failed â </button></div></div><div class="sumb" id="hascSum"></div><div class="cnt" id="hascCnt"><div class="loading">Loading live training recordsâ¦</div></div></div>
+<div id="hM"><div class="hdr"><div style="display:flex;align-items:center"><div class="logo-wrap"><img src="hasc-logo.png" alt="HASC Center" style="height:38px;display:block"></div><span class="lib-sub">Training Library</span><a href="javascript:history.back()" style="margin-left:auto;text-decoration:none;border:1px solid #d6dce2;background:#fff;border-radius:7px;padding:7px 14px;font-size:13px;color:#2b3a45">← Back</a><a href="index.html" style="margin-left:8px;text-decoration:none;border:1px solid #d6dce2;background:#fff;border-radius:7px;padding:7px 14px;font-size:13px;color:#2b3a45">🏠 Home</a></div><div class="rsw"><span class="rlab">Live data · read-only</span></div></div><div class="tbar"><div class="sbox"><span class="si">🔍</span><input type="text" id="hascSearch" placeholder="Search staff name…"></div><div class="fgrp"><button class="fbtn active" data-f="all">All</button><button class="fbtn" data-f="pass">Passed</button><button class="fbtn miss" data-f="fail">Failed ⚠</button></div></div><div class="sumb" id="hascSum"></div><div class="cnt" id="hascCnt"><div class="loading">Loading live training records…</div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="wb-config.js"></script>
 <script>
@@ -85,11 +85,11 @@ function groupCerts(rows){
     if(!byRes[res].trainings[title]) byRes[res].trainings[title]={id:res+"|"+title,title:title,staff:[]};
     var status=(c.passed===true||c.passed==="true")?"pass":"fail";
     byRes[res].trainings[title].staff.push({
-      name:c.dsp_name||c.nurse_email||"â",
-      role:c.dsp_title||"â",
+      name:c.dsp_name||c.nurse_email||"—",
+      role:c.dsp_title||"—",
       status:status,
-      date:c.completed_at?new Date(c.completed_at).toLocaleDateString():"â",
-      score:(c.score!=null?c.score:"â")
+      date:c.completed_at?new Date(c.completed_at).toLocaleDateString():"—",
+      score:(c.score!=null?c.score:"—")
     });
   });
   return Object.keys(byRes).sort().map(function(rk){
@@ -101,24 +101,24 @@ function stats(res){var p=0,m=0;res.trainings.forEach(function(t){t.staff.forEac
 function hbar(s){if(!s.tot)return"";var pct=function(v){return Math.round(v/s.tot*100)};return "<div class=\"hb\">"+(s.p?"<div class=\"hs p\" style=\"width:"+pct(s.p)+"%\"></div>":"")+(s.m?"<div class=\"hs m\" style=\"width:"+pct(s.m)+"%\"></div>":"")+"</div>";}
 function renderCard(res){
   var s=stats(res);
-  var chip=s.m>0?"<span class=\"cmiss\">â  "+s.m+" failed</span>":"<span class=\"cok\">â All passed</span>";
+  var chip=s.m>0?"<span class=\"cmiss\">⚠ "+s.m+" failed</span>":"<span class=\"cok\">✓ All passed</span>";
   var trHTML=res.trainings.map(function(t){
     var tp=t.staff.filter(function(x){return x.status==="pass"}).length;
     var tm=t.staff.filter(function(x){return x.status==="fail"}).length;
     var tot=tp+tm;
     var mb=tot?"<div class=\"mb\">"+(tp?"<div class=\"hs p\" style=\"width:"+Math.round(tp/tot*100)+"%\"></div>":"")+(tm?"<div class=\"hs m\" style=\"width:"+Math.round(tm/tot*100)+"%\"></div>":"")+"</div>":"";
     var rows=t.staff.map(function(sf){
-      var cert=sf.status==="pass"?"<span class=\"cert\">ð "+sf.score+"</span>":"<span class=\"ncert\">"+sf.score+"</span>";
+      var cert=sf.status==="pass"?"<span class=\"cert\">📄 "+sf.score+"</span>":"<span class=\"ncert\">"+sf.score+"</span>";
       return "<div class=\"sr\" data-nm=\""+(sf.name||"").toString().toLowerCase()+"\" data-st=\""+sf.status+"\"><div class=\"sn\">"+sf.name+"</div><div class=\"sro\">"+sf.role+"</div><div class=\"sb2 "+(sf.status==="pass"?"portal":"missing")+"\">"+(sf.status==="pass"?"Pass":"Fail")+"</div><div class=\"sd\">"+sf.date+"</div>"+cert+"</div>";
     }).join("");
-    return "<div class=\"ts\" data-tid=\""+t.id+"\"><div class=\"th\"><span class=\"tchev\">â¶</span><div class=\"tt\">"+t.title+"</div>"+mb+(tm?"<span style=\"font-size:11px;color:#e53935;font-weight:700;\">"+tm+" failed</span>":"")+"</div><div class=\"stab\"><div class=\"ch\"><div style=\"flex:1\">DSP Name</div><div style=\"width:120px\">Role</div><div style=\"width:60px\">Status</div><div style=\"width:90px\">Date</div><div>Score</div></div>"+rows+"</div></div>";
+    return "<div class=\"ts\" data-tid=\""+t.id+"\"><div class=\"th\"><span class=\"tchev\">▶</span><div class=\"tt\">"+t.title+"</div>"+mb+(tm?"<span style=\"font-size:11px;color:#e53935;font-weight:700;\">"+tm+" failed</span>":"")+"</div><div class=\"stab\"><div class=\"ch\"><div style=\"flex:1\">DSP Name</div><div style=\"width:120px\">Role</div><div style=\"width:60px\">Status</div><div style=\"width:90px\">Date</div><div>Score</div></div>"+rows+"</div></div>";
   }).join("");
-  return "<div class=\"rc\" data-rid=\""+res.id+"\"><div class=\"rh\"><span class=\"chev\">â¶</span><div class=\"rn\">"+res.name+"</div>"+hbar(s)+chip+"</div><div class=\"rb\">"+trHTML+"</div></div>";
+  return "<div class=\"rc\" data-rid=\""+res.id+"\"><div class=\"rh\"><span class=\"chev\">▶</span><div class=\"rn\">"+res.name+"</div>"+hbar(s)+chip+"</div><div class=\"rb\">"+trHTML+"</div></div>";
 }
 function render(){
   var cnt=document.getElementById("hascCnt");
   if(!DATA.length){cnt.innerHTML="<div class=\"loading\">No training records found.</div>";updateSummary();return;}
-  var html="<div class=\"sec-label\">ð  Residence Trainings</div>";
+  var html="<div class=\"sec-label\">🏠 Residence Trainings</div>";
   DATA.forEach(function(res){html+=renderCard(res);});
   cnt.innerHTML=html;bindCards();applyFilters();
 }
@@ -134,7 +134,7 @@ function applyFilters(){
 }
 function updateSummary(){
   var tm=0,tt=0;DATA.forEach(function(r){var s=stats(r);tm+=s.m;tt+=s.tot;});
-  document.getElementById("hascSum").innerHTML="<span class=\"sumc\">"+DATA.length+" residence"+(DATA.length!==1?"s":"")+" Â· "+tt+" training records</span>"+(tm>0?"<span class=\"badge red\">â  "+tm+" failed</span>":"<span class=\"badge green\">â All passed</span>");
+  document.getElementById("hascSum").innerHTML="<span class=\"sumc\">"+DATA.length+" residence"+(DATA.length!==1?"s":"")+" · "+tt+" training records</span>"+(tm>0?"<span class=\"badge red\">⚠ "+tm+" failed</span>":"<span class=\"badge green\">✓ All passed</span>");
 }
 function bindCards(){
   ov.querySelectorAll(".rh").forEach(function(h){h.onclick=function(){h.parentNode.classList.toggle("open");};});
@@ -155,4 +155,3 @@ document.getElementById("hascSearch").oninput=function(e){state.search=e.target.
 </script>
 </body>
 </html>
-c.individual_name+" — "+c.description
