@@ -81,14 +81,16 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;mi
   <!-- Step 1: DSP Info -->
 <div id="step-info" style="display:none">
   <div class="steps">
-<div class="step active" id="s1"><div class="step-num">1</div><div class="step-label">Your Info</div></div>
+<div class="step active"><div class="step-num">1</div><div class="step-label">Your Info</div></div>
 <div class="step-line"></div>
-<div class="step" id="s2"><div class="step-num">2</div><div class="step-label">Watch Video</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-label">Watch Video</div></div>
 <div class="step-line"></div>
-<div class="step" id="s3"><div class="step-num">3</div><div class="step-label">Quiz</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-label">Attestation</div></div>
 <div class="step-line"></div>
-<div class="step" id="s4"><div class="step-num">4</div><div class="step-label">Certificate</div></div>
-  </div>
+<div class="step"><div class="step-num">4</div><div class="step-label">Quiz</div></div>
+<div class="step-line"></div>
+<div class="step"><div class="step-num">5</div><div class="step-label">Certificate</div></div>
+</div>
 <div class="card">
 <h2>👋 Welcome — Please Enter Your Information</h2>
 <div id="info-alert"></div>
@@ -114,13 +116,15 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;mi
 <!-- Step 2: Video -->
 <div id="step-video" style="display:none">
 <div class="steps">
-<div class="step done" id="v1"><div class="step-num">✓</div><div class="step-label">Your Info</div></div>
-  <div class="step-line"></div>
-<div class="step active" id="v2"><div class="step-num">2</div><div class="step-label">Watch Video</div></div>
+<div class="step done"><div class="step-num">✓</div><div class="step-label">Your Info</div></div>
 <div class="step-line"></div>
-<div class="step" id="v3"><div class="step-num">3</div><div class="step-label">Quiz</div></div>
-  <div class="step-line"></div>
-<div class="step" id="v4"><div class="step-num">4</div><div class="step-label">Certificate</div></div>
+<div class="step active"><div class="step-num">2</div><div class="step-label">Watch Video</div></div>
+<div class="step-line"></div>
+<div class="step"><div class="step-num">3</div><div class="step-label">Attestation</div></div>
+<div class="step-line"></div>
+<div class="step"><div class="step-num">4</div><div class="step-label">Quiz</div></div>
+<div class="step-line"></div>
+<div class="step"><div class="step-num">5</div><div class="step-label">Certificate</div></div>
 </div>
 <div class="card">
 <h2>🎥 Watch the Training Video</h2>
@@ -135,11 +139,16 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;mi
 <!-- Step 3: Quiz -->
 <div id="step-questions" style="display:none">
       <div class="steps">
-        <div class="step done"><div class="step-num">✓</div><div class="step-label">Your Info</div><div class="step-line"></div></div>
-        <div class="step done"><div class="step-num">✓</div><div class="step-label">Watch Video</div><div class="step-line"></div></div>
-        <div class="step active"><div class="step-num">3</div><div class="step-label">Questions</div><div class="step-line"></div></div>
-        <div class="step"><div class="step-num">4</div><div class="step-label">Certificate</div></div>
-      </div>
+<div class="step done"><div class="step-num">✓</div><div class="step-label">Your Info</div></div>
+<div class="step-line"></div>
+<div class="step done"><div class="step-num">✓</div><div class="step-label">Watch Video</div></div>
+<div class="step-line"></div>
+<div class="step"><div class="step-num">3</div><div class="step-label">Attestation</div></div>
+<div class="step-line"></div>
+<div class="step"><div class="step-num">4</div><div class="step-label">Quiz</div></div>
+<div class="step-line"></div>
+<div class="step"><div class="step-num">5</div><div class="step-label">Certificate</div></div>
+</div>
       <div class="card">
         <h2>💬 Do You Have Questions?</h2>
         <p style="color:#6b7280;margin-bottom:8px;">Before taking the quiz, do you have any questions about the training video for the nurse?</p>
@@ -163,15 +172,44 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;mi
         </div>
       </div>
     </div>
-    <div id="step-quiz" style="display:none">
+    <!-- Step 4: Attestation -->
+<div id="step-attest" style="display:none">
 <div class="steps">
 <div class="step done"><div class="step-num">✓</div><div class="step-label">Your Info</div></div>
 <div class="step-line"></div>
 <div class="step done"><div class="step-num">✓</div><div class="step-label">Watch Video</div></div>
 <div class="step-line"></div>
-<div class="step active"><div class="step-num">3</div><div class="step-label">Quiz</div></div>
+<div class="step active"><div class="step-num">3</div><div class="step-label">Attestation</div></div>
 <div class="step-line"></div>
-<div class="step"><div class="step-num">4</div><div class="step-label">Certificate</div></div>
+<div class="step"><div class="step-num">4</div><div class="step-label">Quiz</div></div>
+<div class="step-line"></div>
+<div class="step"><div class="step-num">5</div><div class="step-label">Certificate</div></div>
+</div>
+<div class="card">
+<h2>✓ Attestation</h2>
+<div id="attest-alert"></div>
+<p style="font-size:.95rem;line-height:1.6;color:#374151;margin-bottom:18px">Please confirm the statement below before continuing to the quiz.</p>
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:18px 20px;margin-bottom:18px">
+<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+<input type="checkbox" id="attest-check" style="width:18px;height:18px;margin-top:3px;flex:none"/>
+<span style="font-size:.95rem;line-height:1.55;color:#1a202c">I certify that I watched the training video in full and was given the opportunity to ask questions.</span>
+</label>
+</div>
+<p style="font-size:.85rem;color:#6b7280;margin-bottom:18px">By checking the box and continuing, you are electronically signing this attestation as <strong id="attest-signer">your name</strong> on <strong id="attest-date"></strong>.</p>
+<button class="btn btn-primary" onclick="confirmAttestation()">Confirm &amp; Continue to Quiz</button>
+</div>
+</div>
+<div id="step-quiz" style="display:none">
+<div class="steps">
+<div class="step done"><div class="step-num">✓</div><div class="step-label">Your Info</div></div>
+<div class="step-line"></div>
+<div class="step done"><div class="step-num">✓</div><div class="step-label">Watch Video</div></div>
+<div class="step-line"></div>
+<div class="step done"><div class="step-num">✓</div><div class="step-label">Attestation</div></div>
+<div class="step-line"></div>
+<div class="step active"><div class="step-num">4</div><div class="step-label">Quiz</div></div>
+<div class="step-line"></div>
+<div class="step"><div class="step-num">5</div><div class="step-label">Certificate</div></div>
 </div>
 <div class="card">
 <h2>📝 Knowledge Check Quiz</h2>
@@ -189,9 +227,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;mi
 <div class="step-line"></div>
 <div class="step done"><div class="step-num">✓</div><div class="step-label">Watch Video</div></div>
 <div class="step-line"></div>
+<div class="step done"><div class="step-num">✓</div><div class="step-label">Attestation</div></div>
+<div class="step-line"></div>
 <div class="step done"><div class="step-num">✓</div><div class="step-label">Quiz</div></div>
 <div class="step-line"></div>
-<div class="step active"><div class="step-num">4</div><div class="step-label">Certificate</div></div>
+<div class="step active"><div class="step-num">5</div><div class="step-label">Certificate</div></div>
 </div>
 <div class="card" id="cert-card"></div>
 </div>
@@ -212,7 +252,7 @@ function getToken(){
 }
 
 function showStep(id){
-  ['step-info','step-video','step-quiz','step-cert','loading-screen','error-screen'].forEach(s=>{
+  ['step-info','step-video','step-attest','step-quiz','step-cert','loading-screen','error-screen'].forEach(s=>{
     const el=document.getElementById(s);
     if(el) el.style.display='none';
 });
@@ -322,6 +362,8 @@ async function submitQuiz(){
     score:score,
     passed:passed,
     completed_at:now,
+    attested_at:window.__attestedAt||null,
+    attestation:window.__attestationText||null,
     session_id:sessionData.id
 });
 
@@ -363,7 +405,7 @@ document.addEventListener('DOMContentLoaded',loadSession);
     function showQuestionsForm(){document.getElementById('q-form').style.display='block';document.getElementById('q-choice').style.display='none';document.getElementById('q-phone').focus();}
     function cancelQuestions(){document.getElementById('q-form').style.display='none';document.getElementById('q-choice').style.display='flex';document.getElementById('q-err').style.display='none';}
     async function submitQuestions(){const p=(document.getElementById('q-phone').value||'').trim();const q=(document.getElementById('q-text').value||'').trim();const e=document.getElementById('q-err');e.style.display='none';if(!p){e.textContent='Please enter your callback phone number.';e.style.display='block';return;}if(!q){e.textContent='Please type your questions before submitting.';e.style.display='block';return;}const b=document.querySelector('#q-form .btn-primary');const o=b.textContent;b.textContent='Submitting...';b.disabled=true;const{error}=await sb.from('dsp_questions').insert({dsp_name:sessionData?(sessionData.dsp_name||document.getElementById('dsp-name')?.value||''):(document.getElementById('dsp-name')?.value||''),dsp_phone:p,questions:q,residence:sessionData?(sessionData.residence||''):'',nurse_email:sessionData?(sessionData.nurse_email||''):'',session_id:sessionData?(sessionData.id||null):null,session_token:getToken(),resolved:false});if(error){e.textContent='Error: '+error.message;e.style.display='block';b.textContent=o;b.disabled=false;return;}document.getElementById('q-form').style.display='none';document.getElementById('q-submitted').style.display='block';setTimeout(function(){document.getElementById('step-questions').style.display='none';goToQuiz();},1200);}
-    function proceedToQuiz(){goToQuiz();}
+    function proceedToQuiz(){goToAttestation();}
 </script>
   <!-- View mode toggle: Phone / PC / Auto -->
   <style id="hasc-view-toggle-style">
@@ -445,6 +487,24 @@ document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeDocFu
  if(dc){ new MutationObserver(syncFsBtn).observe(dc,{childList:true}); }
  setTimeout(syncFsBtn,300); setTimeout(syncFsBtn,1200);
 })();
+
+function goToAttestation(){
+  showStep('step-attest');
+  var nm=(document.getElementById('dsp-name')||{}).value||'';
+  var sg=document.getElementById('attest-signer'); if(sg) sg.textContent=nm||'your name';
+  var dt=document.getElementById('attest-date'); if(dt) dt.textContent=new Date().toLocaleDateString();
+  var cb=document.getElementById('attest-check'); if(cb) cb.checked=false;
+  window.scrollTo(0,0);
+}
+function confirmAttestation(){
+  var cb=document.getElementById('attest-check');
+  var al=document.getElementById('attest-alert');
+  if(!cb||!cb.checked){ if(al) al.innerHTML='<div class="alert alert-error">Please check the box to confirm before continuing.</div>'; return; }
+  if(al) al.innerHTML='';
+  window.__attestedAt=new Date().toISOString();
+  window.__attestationText='I certify that I watched the training video in full and was given the opportunity to ask questions.';
+  goToQuiz();
+}
 </script>
 </body>
 </html>
