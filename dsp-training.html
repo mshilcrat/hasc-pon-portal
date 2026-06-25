@@ -192,7 +192,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;mi
 <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:18px 20px;margin-bottom:18px">
 <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
 <input type="checkbox" id="attest-check" style="width:18px;height:18px;margin-top:3px;flex:none"/>
-<span style="font-size:.95rem;line-height:1.55;color:#1a202c">I certify that I watched the training video in full and was given the opportunity to ask questions.</span>
+<span id="attest-text" style="font-size:.95rem;line-height:1.55;color:#1a202c">I certify that I watched the training video in full and was given the opportunity to ask questions.</span>
 </label>
 </div>
 <p style="font-size:.85rem;color:#6b7280;margin-bottom:18px">By checking the box and continuing, you are electronically signing this attestation as <strong id="attest-signer">your name</strong> on <strong id="attest-date"></strong>.</p>
@@ -282,7 +282,7 @@ async function loadSession(){
   if(!token){showStep('error-screen');document.getElementById('error-msg').textContent='No training token found. Please use the link provided by your nurse.';return;}
   const{data,error}=await sb.from('training_sessions').select('*').eq('session_token',token).single();
   if(error||!data){showStep('error-screen');document.getElementById('error-msg').textContent='Session not found. Please contact your nurse for a new link.';return;}
-  sessionData=data;
+  sessionData=data;try{var _isInd=(sessionData.individual_name!==sessionData.description);var _at=document.getElementById('attest-text');if(_at)_at.textContent='I certify that I watched the training video in full and was given the opportunity to ask '+(_isInd?'the nurse ':'')+'questions.';}catch(e){}
   document.getElementById('dsp-individual').value=data.individual_name||'';
   document.getElementById('dsp-residence').value=data.residence||'';
   const vc=document.getElementById('video-container');
@@ -502,7 +502,7 @@ function confirmAttestation(){
   if(!cb||!cb.checked){ if(al) al.innerHTML='<div class="alert alert-error">Please check the box to confirm before continuing.</div>'; return; }
   if(al) al.innerHTML='';
   window.__attestedAt=new Date().toISOString();
-  window.__attestationText='I certify that I watched the training video in full and was given the opportunity to ask questions.';
+  window.__attestationText='I certify that I watched the training video in full and was given the opportunity to ask '+((sessionData&&sessionData.individual_name!==sessionData.description)?'the nurse ':'')+'questions.';
   goToQuiz();
 }
 </script>
