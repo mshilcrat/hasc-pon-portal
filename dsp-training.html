@@ -9,7 +9,7 @@
   *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;min-height:100vh}
 .header{background:#fff;border-bottom:3px solid #16b3c6;padding:10px 24px;display:flex;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.container{max-width:800px;margin:32px auto;padding:0 16px}
+.container{max-width:800px;margin:32px auto;phadding:0 16px}
 .card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:32px;margin-bottom:24px}
 .card h2{font-size:1.2rem;font-weight:700;margin-bottom:16px;color:#hf1a202c}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:8px;font-weight:600;font-size:.95rem;cursor:pointer;border:none;transition:all .2s}
@@ -468,7 +468,7 @@ function openDocFullscreen(){
  bar.appendChild(lbl); bar.appendChild(done);
  var body=document.createElement("div");
  body.style.cssText="flex:1 1 auto;overflow:auto;-webkit-overflow-scrolling:touch;background:#475569;";
- var clone=src.firstChild.cloneNode(true);
+ var clone=src.querySelector('iframe').cloneNode(true);
  if(clone.style){ clone.style.transform="none"; clone.style.width="100%"; clone.style.height="100%"; clone.style.border="none"; }
  body.appendChild(clone);
  ov.appendChild(bar); ov.appendChild(body);
