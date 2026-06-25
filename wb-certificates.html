@@ -173,7 +173,7 @@
     document.getElementById('search').addEventListener('input', e=>{ state.search=e.target.value; render(); });
     document.querySelectorAll('.fbtn').forEach(b=>b.addEventListener('click', ()=>{ document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.filter=b.getAttribute('data-f'); render(); }));
     (async ()=>{
-      const { data, error } = await sb.from('certificates').select('id,dsp_name,individual_name,residence,completed_at,score,passed,is_archived').order('completed_at',{ascending:false});
+      const { data, error } = await sb.from('certificates').select('id,dsp_name,individual_name,certificate,attestation,attested_at,residence,completed_at,score,passed,is_archived').order('completed_at',{ascending:false});
       if(error){ document.getElementById('cnt').innerHTML='<div class="errbox">Could not load: '+esc(error.message)+'</div>'; return; }
       DATA = data || []; render();
     })();
