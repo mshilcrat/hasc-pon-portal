@@ -112,7 +112,7 @@
       .order('completed_at', { ascending:false });
     if(error){ $('content').innerHTML = '<div class="errbox">Could not load certificates: '+esc(error.message)+'</div>'; return; }
     ROWS = (data||[]).map(r => ({
-      id:r.id, name:r.dsp_name||r.individual_name||'', training:r.certificate||'', residence:r.residence||'',
+              id:r.id, name:r.dsp_name||'', training:r.individual_name||'', residence:r.residence||'',
       date:fmtDate(r.completed_at), score:r.score, passed:r.passed, result:r.passed?'Pass':'Fail',
       handled:!!r.is_handled, attestation:r.attestation, attestedAt:r.attested_at
     }));
