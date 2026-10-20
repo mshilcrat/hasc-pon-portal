@@ -351,11 +351,16 @@ async function submitQuiz(){
   const passed=score>=4;
   const now=new Date().toISOString();
 
+  if(!(sessionData.description||sessionData.individual_name||'').trim()){
+    alert.innerHTML='<div class="alert alert-error">Training title is missing. Please contact your nurse; your certificate has not been saved.</div>';
+    return;
+  }
+
   // Save certificate to Supabase
   const{error}=await sb.from('certificates').insert({
     nurse_email:sessionData.nurse_email,
     residence:sessionData.residence,
-    individual_name:sessionData.description,
+    individual_name:(sessionData.description||sessionData.individual_name||'').trim(),
     certificate:(sessionData.individual_name!==sessionData.description)?sessionData.individual_name:null,
     dsp_name:dspName,
     
